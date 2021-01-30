@@ -204,32 +204,6 @@ class HashTabelle extends Panel implements Runnable {
    	catch (InterruptedException e) { e.printStackTrace(); }
 	
     
-	/*
-	 
-	Ideas for solution:
-	
-	1:
-	new javax.swing.Timer(PAUSE, null );
-	timer.wait(PAUSE);
-	
-	2:
-	timer = new javax.swing.Timer(PAUSE, null );
-    
-    3:
-    try {
-			TimeUnit.SECONDS.sleep(0.5);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	4:
-	timer = new javax.swing.Timer(1000, null);
-    timer.setRepeats(false);
-    timer.start();
-	
-    */
-	
-    
 	switch( vorgang ) {
 
 	case EINFUEGEN: {

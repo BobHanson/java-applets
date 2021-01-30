@@ -243,278 +243,29 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
     System.out.println("Step: Init");
     } //Ende public void init()
 
-    /**
-     * Steuert die Reaktionen auf die Bet&auml;tigung der Buttons
-     */
-    public void actionPerformed(ActionEvent ae) {
-	String cmd = ae.getActionCommand();
-	System.out.println("Step: ActionEvent: " + cmd);
-	System.out.println("Tempo: " + (46-tempo.getValue()));
-	
-	//im nicht interaktiven Modus********************************************
-	if(interaktiv == false) {
-	    //Reaktion auf Betaetigung des Button EINFUEGEN
-		label2.setText("");
-	    if (cmd.equals("einf\u00fcgen")) {
-	    	
-		try {
+	/**
+	 * Steuert die Reaktionen auf die Bet&auml;tigung der Buttons
+	 */
+	public void actionPerformed(ActionEvent ae) {
+		String cmd = ae.getActionCommand();
+		System.out.println("Step: ActionEvent: " + cmd);
+		System.out.println("Tempo: " + (46 - tempo.getValue()));
 
-		    String key = schluesselEingabe.getText();
-		    int schluessel = Integer.valueOf(key).intValue();
-		    schluesselEingabe.setText("");
-
-		    //bei falscher Zahleneingabe
-		    if (schluessel<0 || schluessel>=10000) {
-			label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
-		    }
-
-		    //bei richtiger Zahleneingabe wird einfuegen in der
-		    //HashTabelle aufgerufen. Die Rueckgabe aendert label2
-		    if (schluessel>=0 && schluessel<10000) {
-			Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
-			String erg = tabelle.sondierMethode(eingabeDatum, methode, EINFUEGEN, (46-tempo.getValue()));
-			if (erg.equals("Fehler!")) {
-			    label2.setText("Tabelle voll!");
-			} else {
-			    label2.setText("Schl\u00fcssel " +eingabeDatum.schluesselToString() +" eingef\u00fcgt an Stelle " +erg);
-			}
-		    }
-		    //bei falscher Eingabe in das Textfeld oder gar keiner Eingabe
-		    //wird die Number Format Exception gefangen
-		} catch (NumberFormatException nfe) {
-
-		    label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
-		    schluesselEingabe.setText("");
-
-		}
-		//Die gegebenenfalls veraenderte Tabelle wird gezeichnet
-		try {
-
-		    tabelle.repaint();
-
-		}
-		catch (NullPointerException npe) {
-
-		    label2.setText("Erst mit 'neu' eine Tabelle erstellen!");
-
-		}
-
-	    } //Ende Button EINFUEGEN
-
-	    //Reaktion auf Betaetigung des Button suchen
-	    if (cmd.equals("suchen")) {
-
-		try {
-
-		    String key = schluesselEingabe.getText();
-		    int schluessel = Integer.valueOf(key).intValue();
-		    schluesselEingabe.setText("");
-
-		    //bei falscher Zahleneingabe
-		    if (schluessel<0 || schluessel>=10000) {
-			label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
-		    }
-
-		    //bei richtiger Zahleneingabe wird suchen in der
-		    //HashTabelle aufgerufen. Die Rueckgabe aendert label2
-		    if (schluessel>=0 && schluessel<10000) {
-			Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
-			String erg = tabelle.sondierMethode(eingabeDatum, methode, SUCHEN, (46-tempo.getValue()));
-			if (erg.equals("Fehler!")) {
-			    label2.setText("Schl\u00fcssel nicht in Tabelle!");
-			} else {
-			    label2.setText("Schl\u00fcssel " +eingabeDatum.schluesselToString() +" gefunden an Stelle " +erg);
-			}
-		    }
-		    //bei falscher Eingabe in das Textfeld oder gar keiner Eingabe
-		    //wird die Number Format Exception gefangen
-		} catch (NumberFormatException nfe) {
-
-		    label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
-		    schluesselEingabe.setText("");
-
-		}
-
-		//Die Tabelle wird gezeichnet
-		try {
-			System.out.println("Step: Tabelle gezeichnet");
-		    tabelle.repaint();
-
-		}
-		catch (NullPointerException npe) {
-
-		    label2.setText("Erst mit 'neu' eine Tabelle erstellen!");
-
-		}
-
-	    } //Ende Button suchen
-
-	    //Reaktion auf Betaetigung des Button LOESCHEN
-	    if (cmd.equals("l\u00f6schen")) {
-
-		try {
-
-		    String key = schluesselEingabe.getText();
-		    int schluessel = Integer.valueOf(key).intValue();
-		    schluesselEingabe.setText("");
-
-		    //bei falscher Zahleneingabe
-		    if (schluessel<0 || schluessel>=10000) {
-			label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
-		    }
-
-		    //bei richtiger Zahleneingabe wird suchen in der
-		    //HashTabelle aufgerufen. Die Rueckgabe aendert label2
-		    if (schluessel>=0 && schluessel<10000) {
-			Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
-			String erg = tabelle.sondierMethode(eingabeDatum, methode, LOESCHEN, (46-tempo.getValue()));
-			if (erg.equals("Fehler!")) {
-			    label2.setText("Schl\u00fcssel nicht in Tabelle!");
-			} else {
-			    label2.setText("Schl\u00fcssel " +eingabeDatum.schluesselToString() +" gel\u00f6scht an Stelle " +erg);
-			}
-		    }
-
-		    //bei falscher Eingabe in das Textfeld oder gar keiner Eingabe
-		    //wird die Number Format Exception gefangen
-		} catch (NumberFormatException nfe) {
-
-		    label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
-		    schluesselEingabe.setText("");
-		}
-
-		//Die gegebenenfalls veraenderte Tabelle wird gezeichnet
-		try {
-
-		    tabelle.repaint();
-
-		}
-		catch (NullPointerException npe) {
-
-		    label2.setText("Erst mit 'neu' eine Tabelle erstellen!");
-
-		}
-
-	    } //Ende Button LOESCHEN
-	} // Ende nicht interaktiver Modus***************************************
-
-	//interaktiver Modus*****************************************************
-	if (interaktiv == true) {
-	    //Reaktion auf Betaetigung des Buttons EINFUEGEN
-	    if (cmd.equals("einf\u00fcgen")) {
-	    System.out.println("Tempo: " + tempo);
-		String key = schluesselEingabe.getText();
-		int schluessel = Integer.valueOf(key).intValue();
-		Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
-		if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, EINFUEGEN)) {
-
-		    String erg = tabelle.sondierMethode(interaktivDatum, methode, EINFUEGEN, (46-tempo.getValue()));
-		    
-		    
-		    if (erg.equals("Fehler!")) {
-
-			label2.setText("Richtig: Tabelle voll!");
-			schluesselEingabe.setText("");
-
-		    } else {
-
-			label2.setText("Richtig: Schl\u00fcssel " +interaktivDatum.schluesselToString() +" eingef\u00fcgt an Stelle " +erg);
-			schluesselEingabe.setText("");
-
-		    } //Ende if (erg.equals("Fehler!"))
-
+		// Reaktion auf betaetigung des Buttons erstellen
+		// es wird eine Tabelle mit der gewaehlten Spaltenzahl erstellt
+		// und die Sondiermethode festgelegt
+		if (cmd.equals("neu")) {
+			doNew();
+		} else if (interaktiv) {
+			doInteractive(cmd);
 		} else {
+			doNotInteractive(cmd);
+		}
 
-		    label2.setText("Leider falsch! Versuche es noch einmal.");
-
-		} //Ende else if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, EINFUEGEN))
-
-		interaktiv = false;
-		tabelle.setzeNichtInteraktiverModus();
-		erstelle = false;
-		schluesselEingabe.setEditable(true);
-		tabelle.repaint();
-		
-
-	    } //Ende if (cmd.equals("EINF\u00dcGEN"))
-
-	    //Reaktion auf Betaetigung des Button LOESCHEN
-	    if (cmd.equals("suchen")) {
-
-		String key = schluesselEingabe.getText();
-		int schluessel = Integer.valueOf(key).intValue();
-		Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
-		if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, SUCHEN)) {
-
-		    String erg = tabelle.sondierMethode(interaktivDatum, methode, SUCHEN, (46-tempo.getValue()));
-		    if (erg.equals("Fehler!")) {
-
-			label2.setText("Richtig: Schl\u00fcssel nicht in Tabelle!");
-			schluesselEingabe.setText("");
-
-		    } else {
-
-			label2.setText("Richtig: Schl\u00fcssel " +interaktivDatum.schluesselToString() +" gefunden an Stelle " +erg);
-			schluesselEingabe.setText("");
-
-		    } //Ende if (erg.equals("Fehler!"))
-
-		} else {
-
-		    label2.setText("Leider falsch! Versuche es noch einmal.");
-
-		} //Ende else if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, EINFUEGEN))
-
-		interaktiv = false;
-		tabelle.setzeNichtInteraktiverModus();
-		erstelle = false;
-		schluesselEingabe.setEditable(true);
-		tabelle.repaint();
-
-	    } //Ende if (cmd.eqals("suchen"))
-
-	    //Reaktion auf Betaetigung des Button LOESCHEN
-	    if (cmd.equals("l\u00f6schen")) {
-
-		String key = schluesselEingabe.getText();
-		int schluessel = Integer.valueOf(key).intValue();
-		Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
-		if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, LOESCHEN)) {
-
-		    String erg = tabelle.sondierMethode(interaktivDatum, methode, LOESCHEN, (46-tempo.getValue()));
-		    if (erg.equals("Fehler!")) {
-
-			label2.setText("Richtig: Schl\u00fcssel nicht in Tabelle!");
-			schluesselEingabe.setText("");
-
-		    } else {
-
-			label2.setText("Richtig: Schl\u00fcssel " +interaktivDatum.schluesselToString() +" gel\u00f6scht an Stelle " +erg);
-			schluesselEingabe.setText("");
-
-		    } //Ende if (erg.equals("Fehler!"))
-
-		} else {
-
-		    label2.setText("Leider falsch! Versuche es noch einmal.");
-		} //Ende else if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, EINFUEGEN))
-
-		interaktiv = false;
-		tabelle.setzeNichtInteraktiverModus();
-		erstelle = false;
-		schluesselEingabe.setEditable(true);
-		tabelle.repaint();
-
-	    } //Ende if (cmd.eqals("l\u00f6schen"))
-
-	} //Ende interaktiver Modus**********************************************
+	} // END public void actionPerformed(actionEvent ae)
 
 
-	//Reaktion auf betaetigung des Buttons erstellen
-	//es wird eine Tabelle mit der gewaehlten Spaltenzahl erstellt
-	//und die Sondiermethode festgelegt
-	if (cmd.equals("neu")) {
-
+	private void doNew() {
 	    //verlaesst gegebenenfalls den Interaktiven-Modus
 	    interaktiv = false;
 	    erstelle = false;
@@ -560,12 +311,270 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 	    label2.setText("Gib einen Schl\u00fcssel zwischen 0 und 9999 ein");
 
 	    tabelle.repaint();
-	} //Ende Button neu
+	}
 
-    } // END public void actionPerformed(actionEvent ae)
+	private void doInteractive(String cmd) {
+		// Reaktion auf Betaetigung des Buttons EINFUEGEN
+		if (cmd.equals("einf\u00fcgen")) {
+			System.out.println("Tempo: " + tempo);
+			String key = schluesselEingabe.getText();
+			int schluessel = Integer.valueOf(key).intValue();
+			Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
+			if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, EINFUEGEN)) {
 
+				String erg = tabelle.sondierMethode(interaktivDatum, methode, EINFUEGEN, (46 - tempo.getValue()));
 
-    public void itemStateChanged(ItemEvent e) {
+				if (erg.equals("Fehler!")) {
+
+					label2.setText("Richtig: Tabelle voll!");
+					schluesselEingabe.setText("");
+
+				} else {
+
+					label2.setText("Richtig: Schl\u00fcssel " + interaktivDatum.schluesselToString()
+							+ " eingef\u00fcgt an Stelle " + erg);
+					schluesselEingabe.setText("");
+
+				} // Ende if (erg.equals("Fehler!"))
+
+			} else {
+
+				label2.setText("Leider falsch! Versuche es noch einmal.");
+
+			} // Ende else if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode,
+				// EINFUEGEN))
+
+			interaktiv = false;
+			tabelle.setzeNichtInteraktiverModus();
+			erstelle = false;
+			schluesselEingabe.setEditable(true);
+			tabelle.repaint();
+
+		} // Ende if (cmd.equals("EINF\u00dcGEN"))
+
+		// Reaktion auf Betaetigung des Button LOESCHEN
+		if (cmd.equals("suchen")) {
+
+			String key = schluesselEingabe.getText();
+			int schluessel = Integer.valueOf(key).intValue();
+			Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
+			if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, SUCHEN)) {
+
+				String erg = tabelle.sondierMethode(interaktivDatum, methode, SUCHEN, (46 - tempo.getValue()));
+				if (erg.equals("Fehler!")) {
+
+					label2.setText("Richtig: Schl\u00fcssel nicht in Tabelle!");
+					schluesselEingabe.setText("");
+
+				} else {
+
+					label2.setText("Richtig: Schl\u00fcssel " + interaktivDatum.schluesselToString()
+							+ " gefunden an Stelle " + erg);
+					schluesselEingabe.setText("");
+
+				} // Ende if (erg.equals("Fehler!"))
+
+			} else {
+
+				label2.setText("Leider falsch! Versuche es noch einmal.");
+
+			} // Ende else if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode,
+				// EINFUEGEN))
+
+			interaktiv = false;
+			tabelle.setzeNichtInteraktiverModus();
+			erstelle = false;
+			schluesselEingabe.setEditable(true);
+			tabelle.repaint();
+
+		} // Ende if (cmd.eqals("suchen"))
+
+		// Reaktion auf Betaetigung des Button LOESCHEN
+		if (cmd.equals("l\u00f6schen")) {
+
+			String key = schluesselEingabe.getText();
+			int schluessel = Integer.valueOf(key).intValue();
+			Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
+			if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, LOESCHEN)) {
+
+				String erg = tabelle.sondierMethode(interaktivDatum, methode, LOESCHEN, (46 - tempo.getValue()));
+				if (erg.equals("Fehler!")) {
+
+					label2.setText("Richtig: Schl\u00fcssel nicht in Tabelle!");
+					schluesselEingabe.setText("");
+
+				} else {
+
+					label2.setText("Richtig: Schl\u00fcssel " + interaktivDatum.schluesselToString()
+							+ " gel\u00f6scht an Stelle " + erg);
+					schluesselEingabe.setText("");
+
+				} // Ende if (erg.equals("Fehler!"))
+
+			} else {
+
+				label2.setText("Leider falsch! Versuche es noch einmal.");
+			} // Ende else if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode,
+				// EINFUEGEN))
+
+			interaktiv = false;
+			tabelle.setzeNichtInteraktiverModus();
+			erstelle = false;
+			schluesselEingabe.setEditable(true);
+			tabelle.repaint();
+
+		} // Ende if (cmd.eqals("l\u00f6schen"))
+
+	}
+
+	private void doNotInteractive(String cmd) {
+
+		// Reaktion auf Betaetigung des Button EINFUEGEN
+		label2.setText("");
+		if (cmd.equals("einf\u00fcgen")) {
+
+			try {
+
+				String key = schluesselEingabe.getText();
+				int schluessel = Integer.valueOf(key).intValue();
+				schluesselEingabe.setText("");
+
+				// bei falscher Zahleneingabe
+				if (schluessel < 0 || schluessel >= 10000) {
+					label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
+				}
+
+				// bei richtiger Zahleneingabe wird einfuegen in der
+				// HashTabelle aufgerufen. Die Rueckgabe aendert label2
+				if (schluessel >= 0 && schluessel < 10000) {
+					Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
+					String erg = tabelle.sondierMethode(eingabeDatum, methode, EINFUEGEN, (46 - tempo.getValue()));
+					if (erg.equals("Fehler!")) {
+						label2.setText("Tabelle voll!");
+					} else {
+						label2.setText("Schl\u00fcssel " + eingabeDatum.schluesselToString()
+								+ " eingef\u00fcgt an Stelle " + erg);
+					}
+				}
+				// bei falscher Eingabe in das Textfeld oder gar keiner Eingabe
+				// wird die Number Format Exception gefangen
+			} catch (NumberFormatException nfe) {
+
+				label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
+				schluesselEingabe.setText("");
+
+			}
+			// Die gegebenenfalls veraenderte Tabelle wird gezeichnet
+			try {
+
+				tabelle.repaint();
+
+			} catch (NullPointerException npe) {
+
+				label2.setText("Erst mit 'neu' eine Tabelle erstellen!");
+
+			}
+
+		} // Ende Button EINFUEGEN
+
+		// Reaktion auf Betaetigung des Button suchen
+		if (cmd.equals("suchen")) {
+
+			try {
+
+				String key = schluesselEingabe.getText();
+				int schluessel = Integer.valueOf(key).intValue();
+				schluesselEingabe.setText("");
+
+				// bei falscher Zahleneingabe
+				if (schluessel < 0 || schluessel >= 10000) {
+					label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
+				}
+
+				// bei richtiger Zahleneingabe wird suchen in der
+				// HashTabelle aufgerufen. Die Rueckgabe aendert label2
+				if (schluessel >= 0 && schluessel < 10000) {
+					Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
+					String erg = tabelle.sondierMethode(eingabeDatum, methode, SUCHEN, (46 - tempo.getValue()));
+					if (erg.equals("Fehler!")) {
+						label2.setText("Schl\u00fcssel nicht in Tabelle!");
+					} else {
+						label2.setText(
+								"Schl\u00fcssel " + eingabeDatum.schluesselToString() + " gefunden an Stelle " + erg);
+					}
+				}
+				// bei falscher Eingabe in das Textfeld oder gar keiner Eingabe
+				// wird die Number Format Exception gefangen
+			} catch (NumberFormatException nfe) {
+
+				label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
+				schluesselEingabe.setText("");
+
+			}
+
+			// Die Tabelle wird gezeichnet
+			try {
+				System.out.println("Step: Tabelle gezeichnet");
+				tabelle.repaint();
+
+			} catch (NullPointerException npe) {
+
+				label2.setText("Erst mit 'neu' eine Tabelle erstellen!");
+
+			}
+
+		} // Ende Button suchen
+
+		// Reaktion auf Betaetigung des Button LOESCHEN
+		if (cmd.equals("l\u00f6schen")) {
+
+			try {
+
+				String key = schluesselEingabe.getText();
+				int schluessel = Integer.valueOf(key).intValue();
+				schluesselEingabe.setText("");
+
+				// bei falscher Zahleneingabe
+				if (schluessel < 0 || schluessel >= 10000) {
+					label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
+				}
+
+				// bei richtiger Zahleneingabe wird suchen in der
+				// HashTabelle aufgerufen. Die Rueckgabe aendert label2
+				if (schluessel >= 0 && schluessel < 10000) {
+					Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
+					String erg = tabelle.sondierMethode(eingabeDatum, methode, LOESCHEN, (46 - tempo.getValue()));
+					if (erg.equals("Fehler!")) {
+						label2.setText("Schl\u00fcssel nicht in Tabelle!");
+					} else {
+						label2.setText("Schl\u00fcssel " + eingabeDatum.schluesselToString()
+								+ " gel\u00f6scht an Stelle " + erg);
+					}
+				}
+
+				// bei falscher Eingabe in das Textfeld oder gar keiner Eingabe
+				// wird die Number Format Exception gefangen
+			} catch (NumberFormatException nfe) {
+
+				label2.setText("Nur Schl\u00fcssel zwischen 0 und 9999!");
+				schluesselEingabe.setText("");
+			}
+
+			// Die gegebenenfalls veraenderte Tabelle wird gezeichnet
+			try {
+
+				tabelle.repaint();
+
+			} catch (NullPointerException npe) {
+
+				label2.setText("Erst mit 'neu' eine Tabelle erstellen!");
+
+			}
+
+		} // Ende Button LOESCHEN
+	}
+
+	public void itemStateChanged(ItemEvent e) {
     	System.out.println("Step: StateChanged: " + e);
     	
     	//verlaesst gegebenenfalls den Interaktiven-Modus
