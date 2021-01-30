@@ -1,0 +1,3 @@
+/applet-info contains all the info about both of the applet problems
+/old-Java-applets contains the old Java Code
+/new-JS-applets contains the edited Java Code to work properly for SwingJS as well as the ported JS Code
