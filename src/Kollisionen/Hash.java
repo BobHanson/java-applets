@@ -20,6 +20,15 @@ import java.awt.event.*;
 // ++ ItemListener, TextListener                                  ++++
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+/**
+ * @j2sNative 
+		var baseURI = document.body.baseURI;
+		var isTest = (baseURI == null || baseURI.indexOf("_applet.html") >= 0);
+		if (isTest) {
+		 			J2S.thisApplet.__Info.width = 600; J2S.thisApplet.__Info.height = 400;
+		}
+ */
+
 public class Hash extends Applet
                      implements ActionListener, ItemListener, TextListener {
     
@@ -77,6 +86,7 @@ public class Hash extends Applet
     // �berlagert wird die Methode init(), die das Applet initialisiert.
     public void init() {
     	
+      setSize(600,400);	
       this.setBackground(Color.white);
 	  // erst die Labels 
       groesseLabel = new Label("Gr\u00f6\u00dfe: ");
@@ -390,7 +400,7 @@ fazit.setText("");
 	    Hashing = null;
 	    unten.balken = null;
 	    unten.keymatrix = null;
-	    unten.maleFelder(feldanzahl, unten.g);
+	    unten.maleFelder(feldanzahl, null);
 	    unten.gessumme = 0;
 	    // Falls Choice auf Anfangsitem, dann Zeile auskommentieren.
 	    // groesseChoice.select(0);
@@ -582,7 +592,7 @@ fazit.setText("");
 	// Noch kein Objekt Hashing wurde instantiiert.
 	if ((feldanzahl != 0) && (Hashing == null))
 	{
-	    unten.maleFelder(feldanzahl, unten.g);
+	    unten.maleFelder(feldanzahl, null);
 	    // Bei "korrekter" Itemwahl �ndert sich das Label.
 	    firstchoice = true;
 	} // Ende Datenfelder werden bei Wahl von Feldanzahl gemalt.
@@ -598,7 +608,7 @@ fazit.setText("");
 	    altefeldanz = unten.felder;
 	    Hashing = null;
 	    Hashing = new HashTabelle(feldanzahl+1);
-	    unten.maleFelder(feldanzahl, unten.g);
+	    unten.maleFelder(feldanzahl, null);
 	    firstchoice = true;
 	    if ((key != -1) && (methode!=0))
 	    {
@@ -714,7 +724,7 @@ fazit.setText("");
 	Hashing.NeueSaeule(zuweisung);
 	if (Hashing.saeule[zuweisung]>14)
 	    fazit.setText("Nicht mehr graphisch darstellbar - intern geht es    bis 19 weiter!");
-	unten.maleSaeule(Hashing.saeule, zuweisung, key, unten.g);
+	unten.maleSaeule(Hashing.saeule, zuweisung, key);
 
     } // Ende DatenTransfer()
 
