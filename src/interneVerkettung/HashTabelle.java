@@ -465,8 +465,11 @@ class HashTabelle extends Panel implements Runnable {
 			arbeitsFarbe = DEFAULT_FARBE;
 
 		}
+		g.dispose();
 		forjSoll(0,datum, vorgang, tempo, arbeitsFarbe, img, () -> {
-			g.clearRect(0, 50, 520, HOEHE);
+			Graphics g2 = getGraphics();
+			g2.clearRect(0, 50, 520, HOEHE);
+			g2.dispose();
 			forkSoll(0,datum, vorgang, tempo, arbeitsFarbe, img, whenDone);
 		});
 	}
@@ -484,9 +487,9 @@ class HashTabelle extends Panel implements Runnable {
 			g.drawString(datum.sollIndexToString(), BEGINN + ((BREITE / 2) - 16) + j, 85);
 			g.dispose();
 			pause(tempo, (e) -> {
-				Graphics gg = getGraphics();
-				gg.drawImage(img, 0, -2, me);
-				gg.dispose();
+				Graphics g2 = getGraphics();
+				g2.drawImage(img, 0, -2, me);
+				g2.dispose();
 				forjSoll(j + 2,datum, vorgang, tempo, arbeitsFarbe, img, whenDone);
 			});
 		} else {
@@ -513,9 +516,10 @@ class HashTabelle extends Panel implements Runnable {
 			g.dispose();
 			int newk = k + 2;
 			pause(tempo, (e) -> {
-				Graphics gg = getGraphics();
-				gg.drawImage(img, 0, -2, me);
-				gg.dispose();
+//				Graphics g2 = getGraphics();
+//				// wrong rectangle
+//				g2.drawImage(img, 0, -2, me);
+//				g2.dispose();
 				forkSoll(newk,datum, vorgang, tempo, arbeitsFarbe, img, whenDone);
 			});
 		} else {
@@ -571,9 +575,9 @@ class HashTabelle extends Panel implements Runnable {
 			g.drawString(datum.sollIndexToString(), (BREITE / 2) - 16, 35 + 3);
 			g.dispose();
 			pause(tempo, (e) -> {			
-				Graphics gg = getGraphics();
-				gg.drawImage(img, BEGINN + (ort * (BREITE + 2)), 83 + j, me);
-				gg.dispose();
+				Graphics g2 = getGraphics();
+				g2.drawImage(img, BEGINN + (ort * (BREITE + 2)), 83 + j, me);
+				g2.dispose();
 				forjIst(j + 3, arbeitsFarbe, img,datum, ort, vorgang, tempo, r);
 			});
 		} else {
@@ -669,9 +673,9 @@ class HashTabelle extends Panel implements Runnable {
 			int kFinal = k;
 			g.dispose();
 			pause(tempo, (e) -> {
-				Graphics gg = getGraphics();
-				gg.drawImage(img, 0, -3, me);
-				gg.dispose();
+				Graphics g2 = getGraphics();
+				g2.drawImage(img, 0, -3, me);
+				g2.dispose();
 				foriVerschieben(i + 3, kFinal,datum, ort, verschiebeUmFelder, vorgang, tempo, arbeitsFarbe, img, whenDone);
 			});
     	} else {
