@@ -10,247 +10,252 @@ import java.awt.event.*;
  */
 public class Hash extends Applet implements ActionListener, ItemListener, MouseListener {
 
-    /**
-     * Die HTML Voreinstellung f&uuml;r den Interaktiven Modus
-     */
-    private boolean HTML_Interaktiv = false;
+	/**
+	 * Die HTML Voreinstellung f&uuml;r den Interaktiven Modus
+	 */
+	private boolean HTML_Interaktiv = false;
 
-    /**
-     * Die Farben
-     */
-    private static final Color HINTERGRUND_FARBE = Color.white;
-    private static final Color BUTTON_FARBE = Color.lightGray;
-    private static final Color CHOICE_FARBE = Color.lightGray;
-    
-    /**
-     * Die Vorg&auml;nge, die durchgef&uuml;hrt werden sollen
-     */
-    private static final int EINFUEGEN = 1;
-    private static final int SUCHEN = 2;
-    private static final int LOESCHEN = 3;
+	/**
+	 * Die Farben
+	 */
+	private static final Color HINTERGRUND_FARBE = Color.white;
+	private static final Color BUTTON_FARBE = Color.lightGray;
+	private static final Color CHOICE_FARBE = Color.lightGray;
 
-    /**
-     * Die ben&ouml;tigten Panel
-     */
-    private Panel oben;
+	/**
+	 * Die Vorg&auml;nge, die durchgef&uuml;hrt werden sollen
+	 */
+	private static final int EINFUEGEN = 1;
+	private static final int SUCHEN = 2;
+	private static final int LOESCHEN = 3;
+
+	/**
+	 * Die ben&ouml;tigten Panel
+	 */
+	private Panel oben;
 	private Panel ganzoben;
 	private Panel ganzobenLinks;
-    private Panel bedienfeld;
-    private Panel bedienfeldTabelle;
-    private Panel bedienfeldSondierMethode;
-    private Panel bedienfeldSchluessel;
-    private Panel bedienfeldTempo;
+	private Panel bedienfeld;
+	private Panel bedienfeldTabelle;
+	private Panel bedienfeldSondierMethode;
+	private Panel bedienfeldSchluessel;
+	private Panel bedienfeldTempo;
 
-    /**
-     * Die Label f&uuml;r die Kommunikation mit dem Benutzer
-     */
-    private Label label1;
-    private Label label2;
+	/**
+	 * Die Label f&uuml;r die Kommunikation mit dem Benutzer
+	 */
+	private Label label1;
+	private Label label2;
 
-    /**
-     * Die Label f&uuml;r die Beschriftungen
-     */
-    private Label beschriftungTabelle = new Label("Tabelle", Label.RIGHT);
-    private Label beschriftungEingabe = new Label("Key", Label.RIGHT);
-    private Label beschriftungTempo = new Label("Tempo", Label.RIGHT);
+	/**
+	 * Die Label f&uuml;r die Beschriftungen
+	 */
+	private Label beschriftungTabelle = new Label("Tabelle", Label.RIGHT);
+	private Label beschriftungEingabe = new Label("Key", Label.RIGHT);
+	private Label beschriftungTempo = new Label("Tempo", Label.RIGHT);
 	private Label schluesselLabel;
 	private Label tabellenLabel;
-    private Label methodenLabel;
+	private Label methodenLabel;
 
-    /**
-     * Die Choices f&uuml;r Tabellengr&ouml;&zslig;e und die Sondiermethode
-     */
-    private Choice tabellenGroesse;
-    private Choice sondierMethode;
+	/**
+	 * Die Choices f&uuml;r Tabellengr&ouml;&zslig;e und die Sondiermethode
+	 */
+	private Choice tabellenGroesse;
+	private Choice sondierMethode;
 
-    /**
-     * Die Scrollbar f&uuml;r die Geschwindigkeitsregelung
-     */
-    private Scrollbar tempo;
+	/**
+	 * Die Scrollbar f&uuml;r die Geschwindigkeitsregelung
+	 */
+	private Scrollbar tempo;
 
-    /**
-     * Die Buttons
-     */
-    private Button einfuegen;
-    private Button suchen;
-    private Button loeschen;
-    private Button tabelleErstellen;
+	/**
+	 * Die Buttons
+	 */
+	private Button einfuegen;
+	private Button suchen;
+	private Button loeschen;
+	private Button tabelleErstellen;
 
-    /**
-     * Das Textfeld f&uuml;r die Schl&uuml;sseleingabe
-     */
-    private TextField schluesselEingabe;
+	/**
+	 * Das Textfeld f&uuml;r die Schl&uuml;sseleingabe
+	 */
+	private TextField schluesselEingabe;
 
-    /**
-     * Die Hashtabelle
-     */
-    private HashTabelle tabelle;
-    //private HashTabelle erase;
+	/**
+	 * Die Hashtabelle
+	 */
+	private HashTabelle tabelle;
+	// private HashTabelle erase;
 
-    /**
-     * Die Tabellengr&ouml;&szlig;e
-     */
-    private int feldAnzahl;
-    private int methode;
+	/**
+	 * Die Tabellengr&ouml;&szlig;e
+	 */
+	private int feldAnzahl;
+	private int methode;
 
-    /**
-     * Der interaktive Modus
-     */
-    private boolean interaktiv = false;
-    private boolean erstelle = false;
-    private String aktion = "Klicke das n\u00e4chste Feld oder eine Aktion!";
-    private final int KORREKTUR = -1;
+	/**
+	 * Der interaktive Modus
+	 */
+	private boolean interaktiv = false;
+	private boolean erstelle = false;
+	private String aktion = "Klicke das n\u00e4chste Feld oder eine Aktion!";
+	private final int KORREKTUR = -1;
 
-    /**
-     * Erzeugt das Applet mit oben der Beschriftung und unten den
-     * Bedienfeldern; jedoch ohne Tabelle
-     */
-    public void init() {
+	/**
+	 * Erzeugt das Applet mit oben der Beschriftung und unten den Bedienfeldern;
+	 * jedoch ohne Tabelle
+	 */
+	public void init() {
 
-	 HTML_Interaktiv = "true".equalsIgnoreCase(getParameter("HTML_Interaktiv"));
+		HTML_Interaktiv = "true".equalsIgnoreCase(getParameter("HTML_Interaktiv"));
 
-	setBackground(HINTERGRUND_FARBE);
+		setBackground(HINTERGRUND_FARBE);
 
-	//die Label oben fuer die Kommunikation mit dem Benutzer
-	//das Panel fuer die Label und das Layout
-	oben = new Panel();
-	oben.setLayout(new GridLayout(2, 1));
+		// die Label oben fuer die Kommunikation mit dem Benutzer
+		// das Panel fuer die Label und das Layout
+		oben = new Panel();
+		oben.setLayout(new GridLayout(2, 1));
 
-	ganzobenLinks = new Panel();
-	ganzobenLinks.setLayout(new GridLayout(1,4));
+		ganzobenLinks = new Panel();
+		ganzobenLinks.setLayout(new GridLayout(1, 4));
 
-	ganzoben = new Panel();
-	ganzoben.setLayout( new BorderLayout() );
+		ganzoben = new Panel();
+		ganzoben.setLayout(new BorderLayout());
 
-	//das obere Label
-	String text1 = "Hashing: Interne Verkettung";
-	Font fontLabel1 = new Font("SansSerif", Font.BOLD, 14);
-	label1 = new Label(text1, Label.CENTER);
-	label1.setFont(fontLabel1);
+		// das obere Label
+		String text1 = "Hashing: Interne Verkettung";
+		Font fontLabel1 = new Font("SansSerif", Font.BOLD, 14);
+		label1 = new Label(text1, Label.CENTER);
+		label1.setFont(fontLabel1);
 
-	//das untere Label
-	String text2 = "W\u00e4hle Tabellengr\u00f6\u00dfe und Sondiermethode und klicke 'neu'";
-	Font fontLabel2 = new Font("SansSerif", Font.PLAIN, 12);
-	label2 = new Label(text2, Label.CENTER);
-	label2.setFont(fontLabel2);
+		// das untere Label
+		String text2 = "W\u00e4hle Tabellengr\u00f6\u00dfe und Sondiermethode und klicke 'neu'";
+		Font fontLabel2 = new Font("SansSerif", Font.PLAIN, 12);
+		label2 = new Label(text2, Label.CENTER);
+		label2.setFont(fontLabel2);
 
-	//die Label in das Panel oben
-	oben.add(ganzoben);
-	oben.add(label2);
+		// die Label in das Panel oben
+		oben.add(ganzoben);
+		oben.add(label2);
 
-	//Unten: Schluesseleingabe Einfuegen Suchen Loeschen
-	bedienfeld = new Panel();
+		// Unten: Schluesseleingabe Einfuegen Suchen Loeschen
+		bedienfeld = new Panel();
 
-	//das Panel fuer die Beschriftung und das Textfeld Schluesseleingabe
-	bedienfeldSchluessel = new Panel();
-	bedienfeldSchluessel.setLayout(new FlowLayout());
-	schluesselEingabe = new TextField("", 4);
-	schluesselEingabe.setEditable(false);
-	bedienfeldSchluessel.add(beschriftungEingabe);
-	bedienfeldSchluessel.add(schluesselEingabe);
+		// das Panel fuer die Beschriftung und das Textfeld Schluesseleingabe
+		bedienfeldSchluessel = new Panel();
+		bedienfeldSchluessel.setLayout(new FlowLayout());
+		schluesselEingabe = new TextField("", 4);
+		schluesselEingabe.setEditable(false);
+		bedienfeldSchluessel.add(beschriftungEingabe);
+		bedienfeldSchluessel.add(schluesselEingabe);
 
-	//die Buttons Einfuegen, Suchen, Loeschen
-	einfuegen = new Button("einf\u00fcgen");
-        einfuegen.setFont(new Font("SansSerif", Font.PLAIN,12));
-	einfuegen.setBackground(BUTTON_FARBE);
-	einfuegen.addActionListener(this);
-	suchen = new Button("suchen");
-	suchen.setBackground(BUTTON_FARBE);
-        suchen.setFont(new Font("SansSerif", Font.PLAIN,12));
-	suchen.addActionListener(this);
-	loeschen = new Button("l\u00f6schen");
-	loeschen.setBackground(BUTTON_FARBE);
-        loeschen.setFont(new Font("SansSerif", Font.PLAIN,12));
-	loeschen.addActionListener(this);
+		// die Buttons Einfuegen, Suchen, Loeschen
+		einfuegen = new Button("einf\u00fcgen");
+		einfuegen.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		einfuegen.setBackground(BUTTON_FARBE);
+		einfuegen.addActionListener(this);
+		suchen = new Button("suchen");
+		suchen.setBackground(BUTTON_FARBE);
+		suchen.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		suchen.addActionListener(this);
+		loeschen = new Button("l\u00f6schen");
+		loeschen.setBackground(BUTTON_FARBE);
+		loeschen.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		loeschen.addActionListener(this);
 
-	//Choice fuer Tabellengroesse und Beschriftung
-	tabellenGroesse = new Choice();
-	tabellenGroesse.setBackground(CHOICE_FARBE);
-	tabellenGroesse.add("7");
-	tabellenGroesse.add("8");
-	tabellenGroesse.add("9");
-	tabellenGroesse.add("10");
-	tabellenGroesse.add("11");
-	tabellenGroesse.add("12");
-	tabellenGroesse.add("13");
-        tabellenGroesse.addItemListener(this);
-	bedienfeldTabelle = new Panel();
-	bedienfeldTabelle.setLayout(new GridLayout(1,2));
-	bedienfeldTabelle.add(beschriftungTabelle);
-	bedienfeldTabelle.add(tabellenGroesse);
+		// Choice fuer Tabellengroesse und Beschriftung
+		tabellenGroesse = new Choice();
+		tabellenGroesse.setBackground(CHOICE_FARBE);
+		tabellenGroesse.add("7");
+		tabellenGroesse.add("8");
+		tabellenGroesse.add("9");
+		tabellenGroesse.add("10");
+		tabellenGroesse.add("11");
+		tabellenGroesse.add("12");
+		tabellenGroesse.add("13");
+		tabellenGroesse.addItemListener(this);
+		bedienfeldTabelle = new Panel();
+		bedienfeldTabelle.setLayout(new GridLayout(1, 2));
+		bedienfeldTabelle.add(beschriftungTabelle);
+		bedienfeldTabelle.add(tabellenGroesse);
 
-	//Choice fuer Sondiermethode
-	sondierMethode = new Choice();
-	sondierMethode.setBackground(CHOICE_FARBE);
-	sondierMethode.add("linear, p=1");
-	sondierMethode.add("linear, p=2");
-	sondierMethode.add("quadratisch");
-        sondierMethode.addItemListener(this);
-	bedienfeldSondierMethode = new Panel();
-	bedienfeldSondierMethode.setLayout(new FlowLayout());
-      	bedienfeldSondierMethode.add(sondierMethode);
+		// Choice fuer Sondiermethode
+		sondierMethode = new Choice();
+		sondierMethode.setBackground(CHOICE_FARBE);
+		sondierMethode.add("linear, p=1");
+		sondierMethode.add("linear, p=2");
+		sondierMethode.add("quadratisch");
+		sondierMethode.addItemListener(this);
+		bedienfeldSondierMethode = new Panel();
+		bedienfeldSondierMethode.setLayout(new FlowLayout());
+		bedienfeldSondierMethode.add(sondierMethode);
 
-	//der Button fuer das erstellen der Tabelle und das festlegen auf
-	//die Sondiermethode
-	tabelleErstellen = new Button("neu");
-	tabelleErstellen.setBackground(BUTTON_FARBE);
-        tabelleErstellen.setFont(new Font("SansSerif", Font.PLAIN,12));
-	tabelleErstellen.addActionListener(this);
+		// der Button fuer das erstellen der Tabelle und das festlegen auf
+		// die Sondiermethode
+		tabelleErstellen = new Button("neu");
+		tabelleErstellen.setBackground(BUTTON_FARBE);
+		tabelleErstellen.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		tabelleErstellen.addActionListener(this);
 
-	//die Scrollbar fuer die Geschwindigkeitsregelung und die Beschriftung
-	tempo = new Scrollbar(Scrollbar.HORIZONTAL , 16 , 4 , 6 , 40);
-	bedienfeldTempo = new Panel();
-	bedienfeldTempo.setLayout(new GridLayout(1,2));
-	bedienfeldTempo.add(beschriftungTempo);
-	bedienfeldTempo.add(tempo);
+		// die Scrollbar fuer die Geschwindigkeitsregelung und die Beschriftung
+		tempo = new Scrollbar(Scrollbar.HORIZONTAL, 16, 4, 6, 40);
+		bedienfeldTempo = new Panel();
+		bedienfeldTempo.setLayout(new GridLayout(1, 2));
+		bedienfeldTempo.add(beschriftungTempo);
+		bedienfeldTempo.add(tempo);
+		
+		tempo.addAdjustmentListener((e) ->{
+			if (tabelle != null)
+				tabelle.animationDelay = getAnimationDelay();
+		});
 
-	// die Labels
-	schluesselLabel = new Label("Schl\u00fcssel: ");
-	schluesselLabel.setBackground(BUTTON_FARBE);
-    schluesselLabel.setAlignment(Label.RIGHT);
-	tabellenLabel = new Label("Gr\u00f6\u00dfe: ");
-    tabellenLabel.setBackground(BUTTON_FARBE);
-	tabellenLabel.setAlignment(Label.RIGHT);
-	methodenLabel = new Label("Methode: ");
-	methodenLabel.setBackground(BUTTON_FARBE);
-	methodenLabel.setAlignment(Label.RIGHT);
+		// die Labels
+		schluesselLabel = new Label("Schl\u00fcssel: ");
+		schluesselLabel.setBackground(BUTTON_FARBE);
+		schluesselLabel.setAlignment(Label.RIGHT);
+		tabellenLabel = new Label("Gr\u00f6\u00dfe: ");
+		tabellenLabel.setBackground(BUTTON_FARBE);
+		tabellenLabel.setAlignment(Label.RIGHT);
+		methodenLabel = new Label("Methode: ");
+		methodenLabel.setBackground(BUTTON_FARBE);
+		methodenLabel.setAlignment(Label.RIGHT);
 
-	//Layout fuer das Bedienfeld unten
-	bedienfeld.setLayout(new GridLayout(1, 5));
-	// bedienfeld.add(bedienfeldSchluessel);
-	bedienfeld.add(schluesselLabel);
-    bedienfeld.add(schluesselEingabe);
-	bedienfeld.add(einfuegen);
-	bedienfeld.add(suchen);
-	bedienfeld.add(loeschen);
-	ganzobenLinks.add(tabellenLabel);
-    ganzobenLinks.add(tabellenGroesse);
-	// bedienfeld.add(bedienfeldTabelle);
-	//bedienfeld.add(bedienfeldSondierMethode);
-	ganzobenLinks.add(methodenLabel);
-    ganzobenLinks.add(sondierMethode);
-	// ganzoben.add(tabelleErstellen);
-	// bedienfeld.add(bedienfeldTempo);
-    ganzobenLinks.add(tempo);
-	ganzoben.add("Center",ganzobenLinks);
-	ganzoben.add("West",tabelleErstellen);
+		// Layout fuer das Bedienfeld unten
+		bedienfeld.setLayout(new GridLayout(1, 5));
+		// bedienfeld.add(bedienfeldSchluessel);
+		bedienfeld.add(schluesselLabel);
+		bedienfeld.add(schluesselEingabe);
+		bedienfeld.add(einfuegen);
+		bedienfeld.add(suchen);
+		bedienfeld.add(loeschen);
+		ganzobenLinks.add(tabellenLabel);
+		ganzobenLinks.add(tabellenGroesse);
+		// bedienfeld.add(bedienfeldTabelle);
+		// bedienfeld.add(bedienfeldSondierMethode);
+		ganzobenLinks.add(methodenLabel);
+		ganzobenLinks.add(sondierMethode);
+		// ganzoben.add(tabelleErstellen);
+		// bedienfeld.add(bedienfeldTempo);
+		ganzobenLinks.add(tempo);
+		ganzoben.add("Center", ganzobenLinks);
+		ganzoben.add("West", tabelleErstellen);
 
-	//das Gesamtlayout ohne die Tabelle
-	//die Tabelle wird erst nach Betaetigung des Buttons Erstellen erstellt
-	setLayout(new BorderLayout());
-	add("North", oben);
-	add("South", bedienfeld);
-    System.out.println("Step: Init");
-    } //Ende public void init()
+		// das Gesamtlayout ohne die Tabelle
+		// die Tabelle wird erst nach Betaetigung des Buttons Erstellen erstellt
+		setLayout(new BorderLayout());
+		add("North", oben);
+		add("South", bedienfeld);
+	} // Ende public void init()
+
+	private int getAnimationDelay() {
+		return 46 - tempo.getValue();
+	}
 
 	/**
 	 * Steuert die Reaktionen auf die Bet&auml;tigung der Buttons
 	 */
 	public void actionPerformed(ActionEvent ae) {
 		String cmd = ae.getActionCommand();
-		System.out.println("Step: ActionEvent: " + cmd);
-		System.out.println("Tempo: " + (46 - tempo.getValue()));
-
 		// Reaktion auf betaetigung des Buttons erstellen
 		// es wird eine Tabelle mit der gewaehlten Spaltenzahl erstellt
 		// und die Sondiermethode festgelegt
@@ -264,7 +269,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 				doInteractiveSuchen();
 			} else if (cmd.equals("l\u00f6schen")) {
 				doInteractiveLoeschen();
-			} 
+			}
 		} else {
 			label2.setText("");
 			if (cmd.equals("einf\u00fcgen")) {
@@ -278,53 +283,52 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 
 	} // END public void actionPerformed(actionEvent ae)
 
-
 	private void doNew() {
-	    //verlaesst gegebenenfalls den Interaktiven-Modus
-	    interaktiv = false;
-	    erstelle = false;
-	    feldAnzahl = Integer.valueOf(tabellenGroesse.getSelectedItem()).intValue();
+		// verlaesst gegebenenfalls den Interaktiven-Modus
+		interaktiv = false;
+		erstelle = false;
+		feldAnzahl = Integer.valueOf(tabellenGroesse.getSelectedItem()).intValue();
 
-	    methode = sondierMethode.getSelectedIndex() + 1;
-	    tabelle = new HashTabelle(feldAnzahl);
-	    // nicht notwendig, da sowieso neuer Vektor - ich bin sooooooo bloed
-	    //	tabelle.setzeNichtInteraktiverModus();
-	    
-	    //Center wird gegebenenfalls freigeraeumt
-	    //remove(getComponentAt(200,200));
+		methode = sondierMethode.getSelectedIndex() + 1;
+		tabelle = new HashTabelle(feldAnzahl);
+		// nicht notwendig, da sowieso neuer Vektor - ich bin sooooooo bloed
+		// tabelle.setzeNichtInteraktiverModus();
 
-	    
-	    //die Tabelle wird in Center des Layout gesetzt
-	    add("Center", tabelle);
-	    tabelle.addMouseListener(this);
+		// Center wird gegebenenfalls freigeraeumt
+		// remove(getComponentAt(200,200));
 
-	    //mindestens eine dieser Methoden ist notwendig, um das
-	    //Layout zu realisieren
-	    doLayout();
-	    validate();
-		
-	    //das Textfeld fuer die Schluesseleingabe wird freigegeben
-	    schluesselEingabe.setText("");
-	    schluesselEingabe.setEditable(true);
+		// die Tabelle wird in Center des Layout gesetzt
+		add("Center", tabelle);
+		tabelle.addMouseListener(this);
 
-	    //label1, also die Ueberschrift wird geschrieben
-	    if ((sondierMethode.getSelectedItem()).equals("linear, p=2")) {
-		label1.setText("Tabelle mit " +feldAnzahl +" Spalten und lineares Sondieren mit p=2");
-	    }
+		// mindestens eine dieser Methoden ist notwendig, um das
+		// Layout zu realisieren
+		doLayout();
+		validate();
+
+		// das Textfeld fuer die Schluesseleingabe wird freigegeben
+		schluesselEingabe.setText("");
+		schluesselEingabe.setEditable(true);
+
+		// label1, also die Ueberschrift wird geschrieben
+		if ((sondierMethode.getSelectedItem()).equals("linear, p=2")) {
+			label1.setText("Tabelle mit " + feldAnzahl + " Spalten und lineares Sondieren mit p=2");
+		}
 		if ((sondierMethode.getSelectedItem()).equals("linear, p=1")) {
-		label1.setText("Tabelle mit " +feldAnzahl +" Spalten und lineares Sondieren mit p=1");
+			label1.setText("Tabelle mit " + feldAnzahl + " Spalten und lineares Sondieren mit p=1");
 		}
 		if ((sondierMethode.getSelectedItem()).equals("quadratisch")) {
-		label1.setText("Tabelle mit " +feldAnzahl +" Spalten und quadratisches Sondieren");
+			label1.setText("Tabelle mit " + feldAnzahl + " Spalten und quadratisches Sondieren");
 		}
 
-		// label1.setText("Tabelle mit " +feldAnzahl +" Spalten und " +sondierMethode.getSelectedItem() +"es Sondieren");
-	    //}
+		// label1.setText("Tabelle mit " +feldAnzahl +" Spalten und "
+		// +sondierMethode.getSelectedItem() +"es Sondieren");
+		// }
 
-	    //die Aufforderung fuer eine Schluesseleingabe wird in label2 geschrieben
-	    label2.setText("Gib einen Schl\u00fcssel zwischen 0 und 9999 ein");
+		// die Aufforderung fuer eine Schluesseleingabe wird in label2 geschrieben
+		label2.setText("Gib einen Schl\u00fcssel zwischen 0 und 9999 ein");
 
-	    tabelle.repaint();
+		tabelle.repaint();
 	}
 
 	private void doInteractiveSuchen() {
@@ -333,7 +337,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 		int schluessel = Integer.valueOf(key).intValue();
 		Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
 		if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, SUCHEN)) {
-			tabelle.sondierMethode(interaktivDatum, methode, SUCHEN, (46 - tempo.getValue()), (erg) -> {
+			tabelle.sondierMethode(interaktivDatum, methode, SUCHEN, getAnimationDelay(), (erg) -> {
 				if (erg.equals("Fehler!")) {
 					label2.setText("Richtig: Schl\u00fcssel nicht in Tabelle!");
 					schluesselEingabe.setText("");
@@ -345,12 +349,11 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 				doneInteractive();
 			});
 			return;
-		} 
+		}
 
 		label2.setText("Leider falsc! Versuche es noch einmal.");
 		doneInteractive();
 	}
-
 
 	private void doneInteractive() {
 		interaktiv = false;
@@ -365,7 +368,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 		int schluessel = Integer.valueOf(key).intValue();
 		Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
 		if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, LOESCHEN)) {
-			tabelle.sondierMethode(interaktivDatum, methode, LOESCHEN, (46 - tempo.getValue()), (erg) -> {
+			tabelle.sondierMethode(interaktivDatum, methode, LOESCHEN, getAnimationDelay(), (erg) -> {
 				if (erg.equals("Fehler!")) {
 					label2.setText("Richtig: Schl\u00fcssel nicht in Tabelle!");
 					schluesselEingabe.setText("");
@@ -385,7 +388,6 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 	}
 
 	private void doInteractiveEinfuegen() {
-		System.out.println("Tempo: " + tempo);
 		String key = schluesselEingabe.getText();
 		int schluessel = Integer.valueOf(key).intValue();
 		Datum interaktivDatum = new Datum(feldAnzahl, schluessel);
@@ -394,7 +396,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 
 		if (tabelle.kontrolliereInteraktiv(interaktivDatum, methode, EINFUEGEN)) {
 
-			tabelle.sondierMethode(interaktivDatum, methode, EINFUEGEN, (46 - tempo.getValue()), (erg) -> {
+			tabelle.sondierMethode(interaktivDatum, methode, EINFUEGEN, getAnimationDelay(), (erg) -> {
 				if (erg.equals("Fehler!")) {
 
 					label2.setText("Richtig: Tabelle voll!");
@@ -421,7 +423,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 		if (schluessel == -1)
 			return;
 		Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
-		tabelle.sondierMethode(eingabeDatum, methode, LOESCHEN, (46 - tempo.getValue()), (erg) -> {
+		tabelle.sondierMethode(eingabeDatum, methode, LOESCHEN, getAnimationDelay(), (erg) -> {
 			if (erg.equals("Fehler!")) {
 				label2.setText("Schl\u00fcssel nicht in Tabelle!");
 			} else {
@@ -464,7 +466,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 		// bei richtiger Zahleneingabe wird suchen in der
 		// HashTabelle aufgerufen. Die Rueckgabe aendert label2
 		Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
-		tabelle.sondierMethode(eingabeDatum, methode, SUCHEN, (46 - tempo.getValue()), (erg) -> {
+		tabelle.sondierMethode(eingabeDatum, methode, SUCHEN, getAnimationDelay(), (erg) -> {
 			if (erg.equals("Fehler!")) {
 				label2.setText("Schl\u00fcssel nicht in Tabelle!");
 			} else {
@@ -481,7 +483,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 		// bei richtiger Zahleneingabe wird einfuegen in der
 		// HashTabelle aufgerufen. Die Rueckgabe aendert label2
 		Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
-		tabelle.sondierMethode(eingabeDatum, methode, EINFUEGEN, (46 - tempo.getValue()), (erg) -> {
+		tabelle.sondierMethode(eingabeDatum, methode, EINFUEGEN, getAnimationDelay(), (erg) -> {
 			if (erg.equals("Fehler!")) {
 				label2.setText("Tabelle voll!");
 			} else {
@@ -493,206 +495,186 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-    	System.out.println("Step: StateChanged: " + e);
-    	
-    	//verlaesst gegebenenfalls den Interaktiven-Modus
-	    interaktiv = false;
-	    erstelle = false;
-    	
 
-        	
-    
-    	    feldAnzahl = Integer.valueOf(tabellenGroesse.getSelectedItem()).intValue();
-    	    System.out.println("Step: getfeldanzahl: " + feldAnzahl);
-    	    methode = sondierMethode.getSelectedIndex() + 1;
-    	    tabelle = new HashTabelle(feldAnzahl);
-    	    // nicht notwendig, da sowieso neuer Vektor - ich bin sooooooo bloed
-    	    //	tabelle.setzeNichtInteraktiverModus();
-    	  	
-    	  
-    	    //Center wird gegebenenfalls freigeraeumt
-    	    //remove(getComponentAt(tabelle.getX(), tabelle.getY()));
-    	    //tabelle.removeAll();
-    	    //tabelle.g.clearRect(0, 0, 524, 520);
-    	    
+		// verlaesst gegebenenfalls den Interaktiven-Modus
+		interaktiv = false;
+		erstelle = false;
 
-    	    //die Tabelle wird in Center des Layout gesetzt
-    	    add("Center", tabelle);
-    	    tabelle.addMouseListener(this);
+		feldAnzahl = Integer.valueOf(tabellenGroesse.getSelectedItem()).intValue();
+		methode = sondierMethode.getSelectedIndex() + 1;
+		tabelle = new HashTabelle(feldAnzahl);
+		// nicht notwendig, da sowieso neuer Vektor - ich bin sooooooo bloed
+		// tabelle.setzeNichtInteraktiverModus();
 
-    	    //mindestens eine dieser Methoden ist notwendig, um das
-    	    //Layout zu realisieren
-    	    doLayout();
-    	    validate();
-    	    
-    	
-    	    //das Textfeld fuer die Schluesseleingabe wird freigegeben
-    	    schluesselEingabe.setText("");
-    	    schluesselEingabe.setEditable(true);
+		// Center wird gegebenenfalls freigeraeumt
+		// remove(getComponentAt(tabelle.getX(), tabelle.getY()));
+		// tabelle.removeAll();
+		// tabelle.g.clearRect(0, 0, 524, 520);
 
-    	    //label1, also die Ueberschrift wird geschrieben
-    	    if ((sondierMethode.getSelectedItem()).equals("linear, p=2")) {
-    		label1.setText("Tabelle mit " +feldAnzahl +" Spalten und lineares Sondieren mit p=2");
-    	    }
-    		if ((sondierMethode.getSelectedItem()).equals("linear, p=1")) {
-    		label1.setText("Tabelle mit " +feldAnzahl +" Spalten und lineares Sondieren mit p=1");
-    		}
-    		if ((sondierMethode.getSelectedItem()).equals("quadratisch")) {
-    		label1.setText("Tabelle mit " +feldAnzahl +" Spalten und quadratisches Sondieren");
-    		}
+		// die Tabelle wird in Center des Layout gesetzt
+		add("Center", tabelle);
+		tabelle.addMouseListener(this);
 
-    		// label1.setText("Tabelle mit " +feldAnzahl +" Spalten und " +sondierMethode.getSelectedItem() +"es Sondieren");
-    	    //}
+		// mindestens eine dieser Methoden ist notwendig, um das
+		// Layout zu realisieren
+		doLayout();
+		validate();
 
-    	    //die Aufforderung fuer eine Schluesseleingabe wird in label2 geschrieben
-    	    label2.setText("Gib einen Schl\u00fcssel zwischen 0 und 9999 ein");
-    	    
-        	
-    	
-    
-        	System.out.println("Step: TabelleVoll: " + tabelle);
-        	tabelle.repaint();
+		// das Textfeld fuer die Schluesseleingabe wird freigegeben
+		schluesselEingabe.setText("");
+		schluesselEingabe.setEditable(true);
 
-    		
-    		
-    		
-    		
-    		
-    	
-    	
-    	
-    	
-         // wir tun so, als ob "neu" geklickt worden waere
-
-
-    }
-
-
-
-    private void remove(Rectangle bounds) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	//Methoden fuer den Interaktiven-Modus**************************************
-    //der MouseListener
-    /**
-     * Bei klick in die bestehende Tabelle wird in den interaktiven Modus
-     * umgeschaltet.<br>
-     * Es k&ouml;nnen die Felder in der Reihenfolge markiert werden und durch
-     * Bet&auml;tigung des entsprechenden Buttons kontrolliert werden.
-     */
-    public void mousePressed(MouseEvent me) {
-
-	int mx = me.getX();
-	int my = me.getY();
-
-	//wenn nichts geklickt ist der Wert -3
-	int angeklicktesFeld = -3;
-
-	//stellt fest, ob der interaktive Modus gewuenscht wird, falls der interaktive Modus erlaubt ist
-	if (HTML_Interaktiv) {
-
-	    if (interaktiv == false) {
-
-		interaktiv = tabelle.kontrolliereModus(mx, my);
-
-	    }//Ende if(interaktiv == false)
-
-	} //Ende if (HTML_Interaktiv)
-
-	if (interaktiv == true) {
-
-	    try {
-
-		String key = schluesselEingabe.getText();
-		int schluessel = Integer.valueOf(key).intValue();
-
-		//bei falscher Zahleneingabe
-		if (schluessel<0 || schluessel>=10000) {
-		    interaktiv = false;
-		    erstelle = false;
-		    schluesselEingabe.setEditable(true);
-		    tabelle.setzeNichtInteraktiverModus();
-		    label2.setText("Bitte auch im interaktiven Modus einen g\u00fcltigen Schl\u00fcssel eingeben!");
-		    schluesselEingabe.setText("");
+		// label1, also die Ueberschrift wird geschrieben
+		if ((sondierMethode.getSelectedItem()).equals("linear, p=2")) {
+			label1.setText("Tabelle mit " + feldAnzahl + " Spalten und lineares Sondieren mit p=2");
+		}
+		if ((sondierMethode.getSelectedItem()).equals("linear, p=1")) {
+			label1.setText("Tabelle mit " + feldAnzahl + " Spalten und lineares Sondieren mit p=1");
+		}
+		if ((sondierMethode.getSelectedItem()).equals("quadratisch")) {
+			label1.setText("Tabelle mit " + feldAnzahl + " Spalten und quadratisches Sondieren");
 		}
 
-		//bei richtiger Zahleneingabe
-		if (schluessel>=0 && schluessel<10000) {
+		// label1.setText("Tabelle mit " +feldAnzahl +" Spalten und "
+		// +sondierMethode.getSelectedItem() +"es Sondieren");
+		// }
 
-		    schluesselEingabe.setEditable(false);
-		    angeklicktesFeld = tabelle.bestimmeAngeklicktesFeld(mx, my);
+		// die Aufforderung fuer eine Schluesseleingabe wird in label2 geschrieben
+		label2.setText("Gib einen Schl\u00fcssel zwischen 0 und 9999 ein");
+		tabelle.repaint();
+		// wir tun so, als ob "neu" geklickt worden waere
+	}
 
-		    if ( 0 <= angeklicktesFeld && angeklicktesFeld < feldAnzahl) {
-			if (erstelle == false) {
-			    tabelle.erstelleInteraktivDatum(feldAnzahl, schluessel);
-			    erstelle = true;
-			} //Ende if (erstelle == false)
-			tabelle.setzeMarkiert(angeklicktesFeld);
+	private void remove(Rectangle bounds) {
+		// TODO Auto-generated method stub
 
-			if (tabelle.schreibeInKontrollvektor(angeklicktesFeld)) {
+	}
 
-			    label2.setText(aktion);
+	// Methoden fuer den Interaktiven-Modus**************************************
+	// der MouseListener
+	/**
+	 * Bei klick in die bestehende Tabelle wird in den interaktiven Modus
+	 * umgeschaltet.<br>
+	 * Es k&ouml;nnen die Felder in der Reihenfolge markiert werden und durch
+	 * Bet&auml;tigung des entsprechenden Buttons kontrolliert werden.
+	 */
+	public void mousePressed(MouseEvent me) {
 
-			} else {
+		int mx = me.getX();
+		int my = me.getY();
 
-			    label2.setText("Das ist nicht m\u00f6glich!");
-			    interaktiv = false;
-			    erstelle = false;
-			    schluesselEingabe.setEditable(true);
+		// wenn nichts geklickt ist der Wert -3
+		int angeklicktesFeld = -3;
 
-			    tabelle.setzeNichtInteraktiverModus();
-			    tabelle.repaint();
+		// stellt fest, ob der interaktive Modus gewuenscht wird, falls der interaktive
+		// Modus erlaubt ist
+		if (HTML_Interaktiv) {
+
+			if (interaktiv == false) {
+
+				interaktiv = tabelle.kontrolliereModus(mx, my);
+
+			} // Ende if(interaktiv == false)
+
+		} // Ende if (HTML_Interaktiv)
+
+		if (interaktiv == true) {
+
+			try {
+
+				String key = schluesselEingabe.getText();
+				int schluessel = Integer.valueOf(key).intValue();
+
+				// bei falscher Zahleneingabe
+				if (schluessel < 0 || schluessel >= 10000) {
+					interaktiv = false;
+					erstelle = false;
+					schluesselEingabe.setEditable(true);
+					tabelle.setzeNichtInteraktiverModus();
+					label2.setText("Bitte auch im interaktiven Modus einen g\u00fcltigen Schl\u00fcssel eingeben!");
+					schluesselEingabe.setText("");
+				}
+
+				// bei richtiger Zahleneingabe
+				if (schluessel >= 0 && schluessel < 10000) {
+
+					schluesselEingabe.setEditable(false);
+					angeklicktesFeld = tabelle.bestimmeAngeklicktesFeld(mx, my);
+
+					if (0 <= angeklicktesFeld && angeklicktesFeld < feldAnzahl) {
+						if (erstelle == false) {
+							tabelle.erstelleInteraktivDatum(feldAnzahl, schluessel);
+							erstelle = true;
+						} // Ende if (erstelle == false)
+						tabelle.setzeMarkiert(angeklicktesFeld);
+
+						if (tabelle.schreibeInKontrollvektor(angeklicktesFeld)) {
+
+							label2.setText(aktion);
+
+						} else {
+
+							label2.setText("Das ist nicht m\u00f6glich!");
+							interaktiv = false;
+							erstelle = false;
+							schluesselEingabe.setEditable(true);
+
+							tabelle.setzeNichtInteraktiverModus();
+							tabelle.repaint();
+
+						}
+
+						tabelle.repaint();
+
+					} // Ende if (-1 <= angeklicktesFeld && angeklicktesFeld < feldAnzahl)
+
+					if (angeklicktesFeld == KORREKTUR) {
+
+						boolean tmp = tabelle.korrektur();
+
+						if (tmp == true) {
+
+							tabelle.repaint();
+
+						} else {
+
+							interaktiv = false;
+							erstelle = false;
+							schluesselEingabe.setEditable(true);
+							label2.setText("Gib einen Schl\u00fcssel zwischen 0 und 9999 ein");
+							tabelle.repaint();
+
+						} // Ende if (tmp > 0)
+					} // Ende if (angeklicktesFeld == KORREKTUR)
+
+				} // Ende bei richtiger Zahleneingabe
+			} // Falls kein oder kein gueltiger Schluessel in das Textfeld eingegeben wurde:
+				// NumberFormatException
+			catch (NumberFormatException nfe) {
+
+				interaktiv = false;
+				erstelle = false;
+				schluesselEingabe.setEditable(true);
+				tabelle.setzeNichtInteraktiverModus();
+				label2.setText("Bitte auch im interaktiven Modus einen g\u00fcltigen Schl\u00fcssel eingeben!");
+				schluesselEingabe.setText("");
 
 			}
 
-			tabelle.repaint();
+		} // Ende if(interaktiv == true)
 
-		    } //Ende if (-1 <= angeklicktesFeld && angeklicktesFeld < feldAnzahl)
+	} // Ende public void mousePressed(MouseEvent me)
 
-		    if (angeklicktesFeld == KORREKTUR) {
+	public void mouseClicked(MouseEvent me) {
+	}
 
-			boolean tmp = tabelle.korrektur();
+	public void mouseReleased(MouseEvent me) {
+	}
 
-			if (tmp == true) {
+	public void mouseEntered(MouseEvent me) {
+	}
 
-			    tabelle.repaint();
-
-			} else {
-
-			interaktiv = false;
-			erstelle = false;
-			schluesselEingabe.setEditable(true);
-			label2.setText("Gib einen Schl\u00fcssel zwischen 0 und 9999 ein");
-			tabelle.repaint();
-
-			} //Ende if (tmp > 0)
-		    } //Ende if (angeklicktesFeld == KORREKTUR)
-
-		} //Ende bei richtiger Zahleneingabe
-	    } //Falls kein oder kein gueltiger Schluessel in das Textfeld eingegeben wurde: NumberFormatException
-	    catch (NumberFormatException nfe) {
-
-		interaktiv = false;
-		erstelle = false;
-		schluesselEingabe.setEditable(true);
-		tabelle.setzeNichtInteraktiverModus();
-		label2.setText("Bitte auch im interaktiven Modus einen g\u00fcltigen Schl\u00fcssel eingeben!");
-		schluesselEingabe.setText("");
-
-	    }
-
-
-
-
-	} //Ende if(interaktiv == true)
-
-    } //Ende public void mousePressed(MouseEvent me)
-
-    public void mouseClicked(MouseEvent me) {}
-    public void mouseReleased(MouseEvent me) {}
-    public void mouseEntered(MouseEvent me) {}
-    public void mouseExited(MouseEvent me) {}
+	public void mouseExited(MouseEvent me) {
+	}
 
 }

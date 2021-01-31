@@ -134,25 +134,28 @@ class HashTabelle extends Panel implements Runnable {
 	 * @param datum   das zu bearbeitende Datum
 	 * @param methode die gew&auml;hlte Sondiermethode
 	 * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
-	 * @param tempo   die Filmgeschwindigkeit
+	 * @param animationDelay   die Filmgeschwindigkeit
 	 * @return das Ergebnis der Aufgabe
 	 */
-	public void sondierMethode(Datum datum, int methode, int vorgang, int tempo, Consumer<String> ret) {
+	public void sondierMethode(Datum datum, int methode, int vorgang, int animationDelay, Consumer<String> ret) {
+		this.animationDelay = animationDelay;
 		switch (methode) {
 		case 1:
-			sondierMethodeEins(datum, vorgang, tempo, ret);
+			sondierMethodeEins(datum, vorgang, animationDelay, ret);
 			return;
 		case 2:
-			sondierMethodeZwei(datum, vorgang, tempo, ret);
+			sondierMethodeZwei(datum, vorgang, animationDelay, ret);
 			return;
 		case 3:
-			sondierMethodeDrei(datum, vorgang, tempo, ret);
+			sondierMethodeDrei(datum, vorgang, animationDelay, ret);
 		}
 		ret.accept("OHA");
 	}
 
 	
 	int tmp, count;
+	
+	public int animationDelay;
 
 	/**
 	 * Das lineare Sondieren
@@ -486,7 +489,7 @@ class HashTabelle extends Panel implements Runnable {
 			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
 			g.drawString(datum.sollIndexToString(), BEGINN + ((BREITE / 2) - 16) + j, 85);
 			g.dispose();
-			pause(tempo, (e) -> {
+			pause(animationDelay, (e) -> {
 				Graphics g2 = getGraphics();
 				g2.drawImage(img, 0, -2, me);
 				g2.dispose();
@@ -515,7 +518,7 @@ class HashTabelle extends Panel implements Runnable {
 					BEGINN + (datum.leseSollIndex() * (BREITE + 2)) + ((BREITE / 2) - 16), 85 + k);
 			g.dispose();
 			int newk = k + 2;
-			pause(tempo, (e) -> {
+			pause(animationDelay, (e) -> {
 // not necessary?
 //				Graphics g2 = getGraphics();
 //				// wrong rectangle
@@ -573,7 +576,7 @@ class HashTabelle extends Panel implements Runnable {
 			gi.drawString(datum.schluesselToString(), (BREITE / 2) - 16, 15 + 3);
 			gi.setColor(TABELLE_BESCHRIFTUNG_FARBE);
 			gi.drawString(datum.sollIndexToString(), (BREITE / 2) - 16, 35 + 3);
-			pause(tempo, (e) -> {	
+			pause(animationDelay, (e) -> {	
 				Graphics g = getGraphics();
 				g.drawImage(img, BEGINN + (ort * (BREITE + 2)), 83 + j, me);
 				g.dispose();
@@ -671,7 +674,7 @@ class HashTabelle extends Panel implements Runnable {
 			}
 			int kFinal = k;
 			g.dispose();
-			pause(tempo, (e) -> {
+			pause(animationDelay, (e) -> {
 				Graphics g2 = getGraphics();
 				g2.drawImage(img, 0, -3, me);
 				g2.dispose();
@@ -927,29 +930,33 @@ class HashTabelle extends Panel implements Runnable {
 	
     }
     
-    /**
-     * &Uuml;bergibt die Kontrolle der interaktiv eingegebenen
-     * Reihenfolge entsprechend der Sondiermethode und L&ouml;schen
-     * Suchen oder Einf&uuml;gen
-     * @param interDatum das Datum
-     * @param methode die Sondiermethode
-     * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
-     * @return true wenn Reihenfolge richig<br>
-     * false wenn Reihenfolge falsch
-     */
-    public boolean kontrolliereInteraktiv(Datum interDatum, int methode, int vorgang) {
-	
-	switch(methode) {
-	    
-	case 1: return kontrolliereMethodeEins(interDatum, vorgang);
-	case 2: return kontrolliereMethodeZwei(interDatum, vorgang);
-	case 3: return kontrolliereMethodeDrei(interDatum, vorgang);
-	    
-	} //Ende switch Methode
-	
-	return false;
-	
-    } //Ende public boolean kontrolliereInteraktiv(Datum interDatum, int methode, int vorgang)
+	/**
+	 * &Uuml;bergibt die Kontrolle der interaktiv eingegebenen Reihenfolge
+	 * entsprechend der Sondiermethode und L&ouml;schen Suchen oder Einf&uuml;gen
+	 * 
+	 * @param interDatum das Datum
+	 * @param methode    die Sondiermethode
+	 * @param vorgang    Einf&uuml;gen, Suchen oder L&ouml;schen
+	 * @return true wenn Reihenfolge richig<br>
+	 *         false wenn Reihenfolge falsch
+	 */
+	public boolean kontrolliereInteraktiv(Datum interDatum, int methode, int vorgang) {
+
+		switch (methode) {
+
+		case 1:
+			return kontrolliereMethodeEins(interDatum, vorgang);
+		case 2:
+			return kontrolliereMethodeZwei(interDatum, vorgang);
+		case 3:
+			return kontrolliereMethodeDrei(interDatum, vorgang);
+
+		} // Ende switch Methode
+
+		return false;
+
+	} // Ende public boolean kontrolliereInteraktiv(Datum interDatum, int methode, int
+		// vorgang)
 
 
     /**
