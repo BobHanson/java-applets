@@ -362,9 +362,9 @@ fazit.setText("");
 		    if ( schluesseltyp == 0 )
 		    {
 			if (count == 1)
-			    fazit.setText(count+" zuf�lliger Datensatz aus: [0 - 9999] wird eingef\u00fcgt");
+			    fazit.setText(count+" zuf\u00E4lliger Datensatz aus: [0 - 9999] wird eingef\u00fcgt");
 			else
-			    fazit.setText(count+" zuf�llige Datens�tze aus: [0 - 9999] werden eingef\u00fcgt");
+			    fazit.setText(count+" zuf\u00E4llige Datens\u00E4tze aus: [0 - 9999] werden eingef\u00fcgt");
 			BerechneZufall1();
 			LabelAngabe();
 			System.out.println("schluesseltyp"+schluesseltyp);
