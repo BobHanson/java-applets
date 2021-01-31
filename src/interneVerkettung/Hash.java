@@ -4,12 +4,23 @@ import java.applet.*;
 import java.awt.*;
 import java.awt.event.*;
 
+
+/**
+ * @j2sNative 
+		var baseURI = document.body.baseURI;
+		var isTest = (baseURI == null || baseURI.indexOf("_applet.html") >= 0);
+		if (isTest) {
+		 			J2S.thisApplet.__Info.width = 600; J2S.thisApplet.__Info.height = 300;
+		}
+ */
+
 /**
  * Die Hash Tabelle beinhaltet die Methoden f&uuml;r das Einsortieren, Suchenn
  * und L&ouml;schen, sowie den Film
  */
 public class Hash extends Applet implements ActionListener, ItemListener, MouseListener {
 
+	
 	/**
 	 * Die HTML Voreinstellung f&uuml;r den Interaktiven Modus
 	 */
@@ -107,6 +118,8 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 	 */
 	public void init() {
 
+		setSize(600, 300);
+		
 		HTML_Interaktiv = "true".equalsIgnoreCase(getParameter("HTML_Interaktiv"));
 
 		setBackground(HINTERGRUND_FARBE);
