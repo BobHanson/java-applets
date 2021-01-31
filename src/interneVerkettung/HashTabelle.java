@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.swing.Timer;
 
@@ -83,517 +84,589 @@ class HashTabelle extends Panel implements Runnable {
     private int[] korrekturvektor;
 
     private Datum interaktivDatum;
+	private HashTabelle me;
 
 
 
-    /**
-     * Der Konstruktor f&uuml;r die Hashtabelle und die Kontroll- und
-     * korrekturvektoren
-     * @param anzEintr die Gr&ouml;&szlig;e der Hashtabelle
-     */
-    HashTabelle(int anzEintr) {
+	/**
+	 * Der Konstruktor f&uuml;r die Hashtabelle und die Kontroll- und
+	 * korrekturvektoren
+	 * 
+	 * @param anzEintr die Gr&ouml;&szlig;e der Hashtabelle
+	 */
+	HashTabelle(int anzEintr) {
+		me = this;
+		FELD_ANZAHL = anzEintr;
+		tabelle = new Datum[FELD_ANZAHL];
+		BREITE = (int) Math.rint(524 / FELD_ANZAHL) - 2;
+		LAENGE = FELD_ANZAHL * (BREITE + 2);
+		BEGINN = 262 - (int) Math.rint(LAENGE / 2);
 
-    
-    	
-    	
-	FELD_ANZAHL = anzEintr;
-	tabelle = new Datum[FELD_ANZAHL];
-	BREITE = (int) Math.rint(524/FELD_ANZAHL)-2;
-	LAENGE = FELD_ANZAHL * (BREITE+2);
-	BEGINN = 262 - (int) Math.rint(LAENGE/2);
+		for (int i = 0; i < FELD_ANZAHL; i++) {
 
-	for (int i=0; i<FELD_ANZAHL; i++) {
+			tabelle[i] = new Datum(FELD_ANZAHL);
 
-	    tabelle[i] = new Datum(FELD_ANZAHL);
+		}
 
-	}
+		// benoetigt fuer verschieben ueber den Rand
+		verschiebeUeberRand = BEGINN + ((FELD_ANZAHL) * (BREITE + 2));
 
-	//benoetigt fuer verschieben ueber den Rand
-	verschiebeUeberRand = BEGINN+((FELD_ANZAHL)*(BREITE+2));
+		// Erzeugen die Kontrollfelder fuer Interaktiv
+		kontrollfelder = new Rectangle[FELD_ANZAHL];
+		for (int i = 0; i < FELD_ANZAHL; i++) {
 
-	//Erzeugen die Kontrollfelder fuer Interaktiv
-	kontrollfelder = new Rectangle[FELD_ANZAHL];
-	for(int i=0; i<FELD_ANZAHL; i++) {
+			kontrollfelder[i] = new Rectangle(BEGINN + (i * (BREITE + 2)), 130, BREITE, HOEHE);
 
-	    kontrollfelder[i] = new Rectangle(BEGINN+(i*(BREITE+2)) , 130 , BREITE , HOEHE);
+		}
 
-	}
+		// Erzeugen der Kontroll- und Korrekturvektoren fuer Interaktiv
+		kontrollvektor = new int[FELD_ANZAHL];
+		korrekturvektor = new int[FELD_ANZAHL];
+		for (int i = 0; i < FELD_ANZAHL; i++) {
 
-	//Erzeugen der Kontroll- und Korrekturvektoren fuer Interaktiv
-	kontrollvektor = new int[FELD_ANZAHL];
-	korrekturvektor = new int[FELD_ANZAHL];
-	for(int i=0; i<FELD_ANZAHL; i++) {
+			kontrollvektor[i] = KEIN_EINTRAG;
+			korrekturvektor[i] = KEIN_EINTRAG;
 
-	    kontrollvektor[i] = KEIN_EINTRAG;
-	    korrekturvektor[i] = KEIN_EINTRAG;
-
-	}
-	
-	
-    }
-
-
-    /**
-     * Die Sondiermethode und der Vorgang werden bestimmt.
-     * @param datum das zu bearbeitende Datum
-     * @param methode die gew&auml;hlte Sondiermethode
-     * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
-     * @param tempo die Filmgeschwindigkeit
-     * @return das Ergebnis der Aufgabe
-     */
-    public String sondierMethode(Datum datum, int methode, int vorgang, int tempo) {
-
-	switch(methode) {
-
-	case 1: return this.sondierMethodeEins(datum, vorgang, tempo, g);
-	case 2: return this.sondierMethodeZwei(datum, vorgang, tempo, g);
-	case 3: return this.sondierMethodeDrei(datum, vorgang, tempo, g);
+		}
 
 	}
 
-	return "OHA";
 
-    }
+	/**
+	 * Die Sondiermethode und der Vorgang werden bestimmt.
+	 * 
+	 * @param datum   das zu bearbeitende Datum
+	 * @param methode die gew&auml;hlte Sondiermethode
+	 * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
+	 * @param tempo   die Filmgeschwindigkeit
+	 * @return das Ergebnis der Aufgabe
+	 */
+	public void sondierMethode(Datum datum, int methode, int vorgang, int tempo, Consumer<String> ret) {
 
-    /**
-     * Das lineare Sondieren
-     * @param datum das zu bearbeitende Datum
-     * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
-     * @param tempo die Filmgeschwindigkeit
-     * @return das Ergebnis der Aufgabe
-     */
-    private String sondierMethodeEins(Datum datum, int vorgang, int tempo, Graphics g) {
+		switch (methode) {
 
-	int tmp = datum.leseSollIndex();
-	int count = 0;
+		case 1:
+			sondierMethodeEins(datum, vorgang, tempo, g, ret);
+		case 2:
+			sondierMethodeZwei(datum, vorgang, tempo, g, ret);
+		case 3:
+			sondierMethodeDrei(datum, vorgang, tempo, g, ret);
+
+		}
+
+		ret.accept("OHA");
+	}
+
 	
-	this.zeichneSoll(g, datum, vorgang, tempo, g);
-	
-	if (vorgang == EINFUEGEN) {
-	    while(tabelle[tmp].leseSchluessel() > FREI && count < FELD_ANZAHL -1) {
-		int verschiebeUmFelder = 1;
+	int tmp, count;
 
-		this.zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g);
-		
-		tmp = (tmp + 1) % FELD_ANZAHL;
-		count++;
+	/**
+	 * Das lineare Sondieren
+	 * 
+	 * @param datum   das zu bearbeitende Datum
+	 * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
+	 * @param tempo   die Filmgeschwindigkeit
+	 * @param ret
+	 * @return das Ergebnis der Aufgabe
+	 */
+	private void sondierMethodeEins(Datum datum, int vorgang, int tempo, Graphics g, Consumer<String> ret) {
 
-	    }
-	} else {
-	    while( (tabelle[tmp].leseSollIndex() != FREI &&
-		    tabelle[tmp].leseSchluessel() != datum.leseSchluessel() ) &&
-		   count < FELD_ANZAHL -1) {
+		zeichneSoll(g, datum, vorgang, tempo, g, () -> {
 
-		int verschiebeUmFelder = 1;
+			tmp = datum.leseSollIndex();
+			count = 0;
 
-		this.zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g);
+			Runnable whenDone = () -> {
+				pause(PAUSE, (e) -> {
+					switch (vorgang) {
+					case EINFUEGEN:
+						if ((tabelle[tmp].leseSchluessel() == FREI || tabelle[tmp].leseSchluessel() == GELOESCHT)
+								&& count < FELD_ANZAHL) {
+							tabelle[tmp] = datum;
+							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+								ret.accept(Integer.toString(tmp));
+							});
+							return;
+						}
+						break;
+					case SUCHEN:
+						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
+								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
+							// zeichneIst(g, datum, tmp, vorgang, tempo);
+							ret.accept(Integer.toString(tmp));
+							return;
+						}
+						break;
+					case LOESCHEN:
+						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
+								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
+							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+								tabelle[tmp].setzeGeloescht();
+								ret.accept(Integer.toString(tmp));
 
-		tmp = (tmp + 1) % FELD_ANZAHL;
-		count++;
+							});
+							return;
+						}
+						break;
+					}
+					ret.accept("Fehler!");
+				});
 
-	    }
+			};
+			if (vorgang == EINFUEGEN) {
+				whileEinsEinfuegen(datum, vorgang, tempo, whenDone);
+			} else {
+				whileEins(datum, vorgang, tempo, whenDone);
+			}
+		});
+	}
 
+	private void whileEinsEinfuegen(Datum datum, int vorgang, int tempo, Runnable whenDone) {
+		if (tabelle[tmp].leseSchluessel() > FREI && count < FELD_ANZAHL - 1) {
+			int verschiebeUmFelder = 1;
+			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+				tmp = (tmp + 1) % FELD_ANZAHL;
+				count++;
+				whileEinsEinfuegen(datum, vorgang, tempo, whenDone);
+			});
+		} else {
+			whenDone.run();
+		}
 	}
 	
-	
-	
-    //Original implementation via thread
-    try {
-   	    Thread.sleep(PAUSE);
-   	}
-   	catch (InterruptedException e) { e.printStackTrace(); }
-	
-    
-	switch( vorgang ) {
-
-	case EINFUEGEN: {
-	    if( (tabelle[tmp].leseSchluessel() == FREI ||
-		 tabelle[tmp].leseSchluessel() == GELOESCHT)
-		&& count < FELD_ANZAHL) {
-		tabelle[tmp] = datum;
-		this.zeichneIst(g, datum, tmp, vorgang, tempo, g);
-		return Integer.toString(tmp);
-	    }
-	}; break;
-	case SUCHEN   : {
-	    if( tabelle[tmp].leseSollIndex() == datum.leseSollIndex() &&
-		tabelle[tmp].leseSchluessel() == datum.leseSchluessel() ) {
-		// this.zeichneIst(g, datum, tmp, vorgang, tempo);
-		return Integer.toString(tmp);
-	    }
-	}; break;
-	case LOESCHEN : {
-	    if( tabelle[tmp].leseSollIndex() == datum.leseSollIndex() &&
-		tabelle[tmp].leseSchluessel() == datum.leseSchluessel() ) {
-		this.zeichneIst(g, datum, tmp, vorgang, tempo, g);
-		tabelle[tmp].setzeGeloescht();
-		return Integer.toString(tmp);
-	    }
-	}; break;
+	private void whileEins(Datum datum, int vorgang, int tempo, Runnable whenDone) {
+		if ((tabelle[tmp].leseSollIndex() != FREI && tabelle[tmp].leseSchluessel() != datum.leseSchluessel())
+				&& count < FELD_ANZAHL - 1) {
+			int verschiebeUmFelder = 1;
+			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+				tmp = (tmp + 1) % FELD_ANZAHL;
+				count++;
+				whileEins(datum, vorgang, tempo, whenDone);
+			});
+		} else {
+			whenDone.run();
+		}
 	}
-	return "Fehler!";
 
-    }
-
-    /**
-     * Das lineare Sondieren mit p=2
-     * @param datum das zu bearbeitende Datum
-     * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
-     * @param tempo die Filmgeschwindigkeit
-     * @return das Ergebnis der Aufgabe
-     */
-    private String sondierMethodeZwei(Datum datum, int vorgang, int tempo, Graphics g) {
-
-	int tmp = datum.leseSollIndex();
-	int count = 0;
-	
-	this.zeichneSoll(g, datum, vorgang, tempo, g);
-
-	if(vorgang == EINFUEGEN) {
-	    while( tabelle[tmp].leseSchluessel() > FREI && count < FELD_ANZAHL-1) {
-		count++;
-
-		int verschiebeUmFelder = (datum.leseSollIndex() + (count*2)) - (datum.leseSollIndex() + ((count-1)*2));
-
-		this.zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g);
-
-		tmp = (datum.leseSollIndex() + (count*2)) % FELD_ANZAHL;
-	    }
-	} else {
-	    while( tabelle[tmp].leseSollIndex() !=  FREI &&
-		   tabelle[tmp].leseSchluessel() != datum.leseSchluessel() &&
-		   count < FELD_ANZAHL-1) {
-
-		count++;
-
-		int verschiebeUmFelder = (datum.leseSollIndex() + (count*2)) - (datum.leseSollIndex() + ((count-1)*2));
-
-		this.zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g);
-
-		tmp = (datum.leseSollIndex() + (count*2)) % FELD_ANZAHL;
-	    }
+	private void pause(int delay, ActionListener listener) {
+    	Timer t = new Timer(delay, listener);
+    	t.setRepeats(false);
+    	t.start();
 	}
-	
-	//THREAD
-	
-	try {
-	    Thread.sleep(PAUSE);
+
+
+	/**
+	 * Das lineare Sondieren mit p=2
+	 * 
+	 * @param datum   das zu bearbeitende Datum
+	 * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
+	 * @param tempo   die Filmgeschwindigkeit
+	 * @param ret
+	 * @return das Ergebnis der Aufgabe
+	 */
+	private void sondierMethodeZwei(Datum datum, int vorgang, int tempo, Graphics g, Consumer<String> ret) {
+
+		zeichneSoll(g, datum, vorgang, tempo, g, () -> {
+
+			tmp = datum.leseSollIndex();
+			count = 0;
+
+			Runnable whenDone = () -> {
+				pause(PAUSE, (e) -> {
+					switch (vorgang) {
+					case EINFUEGEN:
+						if ((tabelle[tmp].leseSchluessel() == FREI || tabelle[tmp].leseSchluessel() == GELOESCHT)
+								&& count < FELD_ANZAHL) {
+							tabelle[tmp] = datum;
+							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+								ret.accept(Integer.toString(tmp));
+							});
+							return;
+						}
+						break;
+					case SUCHEN:
+						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
+								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
+							// zeichneIst(g, datum, tmp, vorgang, tempo);
+							ret.accept(Integer.toString(tmp));
+							return;
+						}
+						break;
+					case LOESCHEN:
+						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
+								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
+							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+								tabelle[tmp].setzeGeloescht();
+								ret.accept(Integer.toString(tmp));
+							});
+							return;
+						}
+						break;
+					}
+					ret.accept("Fehler!");
+				});
+			};
+			if (vorgang == EINFUEGEN) {
+				whileZweiEinfuegen(datum, vorgang, tempo, g, whenDone);
+			} else {
+				whileZwei(datum, vorgang, tempo, g, whenDone);
+			}
+		});
 	}
-	catch (InterruptedException ie) {}
-	 
-	
-	switch( vorgang ) {
 
-	case EINFUEGEN: {
-	    if( (tabelle[tmp].leseSchluessel() == FREI ||
-		 tabelle[tmp].leseSchluessel() == GELOESCHT)
-		&& count < FELD_ANZAHL) {
-		tabelle[tmp] = datum;
-		this.zeichneIst(g, datum, tmp, vorgang, tempo, g);
-		return Integer.toString(tmp);
-	    }
-	}; break;
-	case SUCHEN   : {
-	    if( tabelle[tmp].leseSollIndex() == datum.leseSollIndex() &&
-		tabelle[tmp].leseSchluessel() == datum.leseSchluessel() ) {
-		// this.zeichneIst(g, datum, tmp, vorgang, tempo);
-		return Integer.toString(tmp);
-	    }
-	}; break;
-	case LOESCHEN : {
-	    if( tabelle[tmp].leseSollIndex() == datum.leseSollIndex() &&
-		tabelle[tmp].leseSchluessel() == datum.leseSchluessel() ) {
-		this.zeichneIst(g, datum, tmp, vorgang, tempo, g);
-		tabelle[tmp].setzeGeloescht();
-		return Integer.toString(tmp);
-	    }
-	}; break;
+	private void whileZweiEinfuegen(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+		if (tabelle[tmp].leseSchluessel() > FREI && count < FELD_ANZAHL - 1) {
+			count++;
+			int verschiebeUmFelder = (datum.leseSollIndex() + (count * 2))
+					- (datum.leseSollIndex() + ((count - 1) * 2));
+			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+			tmp = (datum.leseSollIndex() + (count * 2)) % FELD_ANZAHL;
+			whileZweiEinfuegen(datum, vorgang, tempo, g, whenDone);
+			});
+		} else {
+			whenDone.run();
+		}
 	}
-	return "Fehler!";
 
-    }
 
-    /**
-     * Das quadratische Sondieren
-     * @param datum das zu bearbeitende Datum
-     * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
-     * @param tempo die Filmgeschwindigkeit
-     * @return das Ergebnis der Aufgabe
-     */
-    private String sondierMethodeDrei(Datum datum, int vorgang, int tempo, Graphics g) {
-
-	int tmp = datum.leseSollIndex();
-	int count = 0;
-
-	this.zeichneSoll(g, datum, vorgang, tempo, g);
-
-	if (vorgang == EINFUEGEN) {
-	    while( tabelle[tmp].leseSchluessel() > FREI && count < ( (FELD_ANZAHL+1)/2 -1  ) ) {
-		count++;
-
-		int verschiebeUmFelder = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) - (datum.leseSollIndex() + ((int) Math.pow((count-1), 2)));
-
-		this.zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g);
-
-		tmp = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) % FELD_ANZAHL;
-                
-                
-                             
-	    }
-	} else {
-	    while( (tabelle[tmp].leseSollIndex() != FREI &&
-		    tabelle[tmp].leseSchluessel() != datum.leseSchluessel())
-		   && count < ( (FELD_ANZAHL+1)/2-1 ) ) {
-		count++;
-
-		int verschiebeUmFelder = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) - (datum.leseSollIndex() + ((int) Math.pow((count-1), 2)));
-
-		this.zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g);
-
-		tmp = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) % FELD_ANZAHL;
-	    }
+	private void whileZwei(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+		if (tabelle[tmp].leseSollIndex() != FREI && tabelle[tmp].leseSchluessel() != datum.leseSchluessel()
+				&& count < FELD_ANZAHL - 1) {
+			count++;
+			int verschiebeUmFelder = (datum.leseSollIndex() + (count * 2))
+					- (datum.leseSollIndex() + ((count - 1) * 2));
+			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+				tmp = (datum.leseSollIndex() + (count * 2)) % FELD_ANZAHL;
+				whileZwei(datum, vorgang, tempo, g, whenDone);
+			});
+		} else {
+			whenDone.run();
+		}
 	}
-	
-	//THREAD
-	
-	try {
-	    Thread.sleep(PAUSE);
+
+
+	/**
+	 * Das quadratische Sondieren
+	 * 
+	 * @param datum   das zu bearbeitende Datum
+	 * @param vorgang Einf&uuml;gen, Suchen oder L&ouml;schen
+	 * @param tempo   die Filmgeschwindigkeit
+	 * @param ret
+	 * @return das Ergebnis der Aufgabe
+	 */
+	private void sondierMethodeDrei(Datum datum, int vorgang, int tempo, Graphics g, Consumer<String> ret) {
+
+		zeichneSoll(g, datum, vorgang, tempo, g, () -> {
+
+			tmp = datum.leseSollIndex();
+			count = 0;
+
+			Runnable whenDone = () -> {
+				pause(PAUSE, (e) -> {
+					switch (vorgang) {
+					case EINFUEGEN:
+						if ((tabelle[tmp].leseSchluessel() == FREI || tabelle[tmp].leseSchluessel() == GELOESCHT)
+								&& count < FELD_ANZAHL) {
+							tabelle[tmp] = datum;
+							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+								ret.accept(Integer.toString(tmp));
+							});
+							return;
+						}
+						break;
+					case SUCHEN:
+						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
+								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
+							// zeichneIst(g, datum, tmp, vorgang, tempo);
+							ret.accept(Integer.toString(tmp));
+							return;
+						}
+						break;
+					case LOESCHEN:
+						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
+								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
+							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+								tabelle[tmp].setzeGeloescht();
+								ret.accept(Integer.toString(tmp));
+							});
+							return;
+						}
+						break;
+					}
+					ret.accept("Fehler!");
+				});
+			};
+
+			if (vorgang == EINFUEGEN) {
+				whileDreiEinguegen(datum, vorgang, tempo, g, whenDone);
+			} else {
+				whileDrei(datum, vorgang, tempo, g, whenDone);
+			}
+		});
 	}
-	catch (InterruptedException ie) {}
 
-	
-	switch( vorgang ) {
-
-	case EINFUEGEN: {
-	    if( (tabelle[tmp].leseSchluessel() == FREI ||
-		 tabelle[tmp].leseSchluessel() == GELOESCHT)
-		&& count < ( (FELD_ANZAHL+1)/2) ) {
-		tabelle[tmp] = datum;
-		this.zeichneIst(g, datum, tmp, vorgang, tempo, g);
-		return Integer.toString(tmp);
-	    }
-	}; break;
-	case SUCHEN   : {
-	    if( tabelle[tmp].leseSollIndex() == datum.leseSollIndex() &&
-		tabelle[tmp].leseSchluessel() == datum.leseSchluessel() ) {
-		// this.zeichneIst(g, datum, tmp, vorgang, tempo);
-		return Integer.toString(tmp);
-	    }
-	}; break;
-	case LOESCHEN : {
-	    if( tabelle[tmp].leseSollIndex() == datum.leseSollIndex() &&
-		tabelle[tmp].leseSchluessel() == datum.leseSchluessel() ) {
-		this.zeichneIst(g, datum, tmp, vorgang, tempo, g);
-		tabelle[tmp].setzeGeloescht();
-		return Integer.toString(tmp);
-	    }
-	}; break;
+	private void whileDreiEinguegen(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+    	if (tabelle[tmp].leseSchluessel() > FREI && count < ((FELD_ANZAHL + 1) / 2 - 1)) {
+			count++;
+			int verschiebeUmFelder = (datum.leseSollIndex() + ((int) Math.pow(count, 2)))
+					- (datum.leseSollIndex() + ((int) Math.pow((count - 1), 2)));
+			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+				tmp = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) % FELD_ANZAHL;
+				whileDreiEinguegen(datum, vorgang, tempo, g, whenDone);
+			});
+		}
+		whenDone.run();
 	}
-	return "Fehler!";
 
-    }
+	private void whileDrei(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+		if ((tabelle[tmp].leseSollIndex() != FREI && tabelle[tmp].leseSchluessel() != datum.leseSchluessel())
+				&& count < ((FELD_ANZAHL + 1) / 2 - 1)) {
+			count++;
+			int verschiebeUmFelder = (datum.leseSollIndex() + ((int) Math.pow(count, 2)))
+					- (datum.leseSollIndex() + ((int) Math.pow((count - 1), 2)));
+			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+				tmp = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) % FELD_ANZAHL;
+				whileDrei(datum, vorgang, tempo, g, whenDone);
+			});
+		} else {
+			whenDone.run();
+		}
+	}
 
-    // wegen extends Runnable
+
+	// wegen extends Runnable
     public void run() {}
 
-    /**
-     * zeichnet den Weg von oben links bis &uuml;ber die Sollposition
-     * @param g die Graphik
-     * @param datum das zu zeichnende Datum
-     * @param vorgang f&uuml;r die Farbgebung
-     * @param tempo die Filmgeschwindigkeit
-     */
-    private void zeichneSoll(Graphics gg, Datum datum, int vorgang, int tempo, Graphics g) {
-    	System.out.println(g);
-    	System.out.println(gg);
+	/**
+	 * zeichnet den Weg von oben links bis &uuml;ber die Sollposition
+	 * 
+	 * @param g       die Graphik
+	 * @param datum   das zu zeichnende Datum
+	 * @param vorgang f&uuml;r die Farbgebung
+	 * @param tempo   die Filmgeschwindigkeit
+	 */
+	private void zeichneSoll(Graphics gg, Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+		System.out.println(g);
+		System.out.println(gg);
 
-	Color arbeitsFarbe;
+		Color arbeitsFarbe;
 
-        Image img = createImage(520,128);
-        //Graphics g = img.getGraphics();-->Sonderfall
+		Image img = createImage(520, 128);
+		// Graphics g = img.getGraphics();-->Sonderfall
 
+		g.clearRect(0, 0, 520, 128);
 
-	g.clearRect(0, 0, 520, 128);
+		switch (vorgang) {
 
-	switch( vorgang ) {
+		case EINFUEGEN:
+			arbeitsFarbe = BESETZT_FARBE;
+			break;
+		case SUCHEN:
+			arbeitsFarbe = SUCH_FARBE;
+			break;
+		case LOESCHEN:
+			arbeitsFarbe = GELOESCHT_FARBE;
+			break;
+		default:
+			arbeitsFarbe = DEFAULT_FARBE;
 
-	case EINFUEGEN: arbeitsFarbe = BESETZT_FARBE;   break;
-	case SUCHEN   : arbeitsFarbe = SUCH_FARBE;      break;
-	case LOESCHEN : arbeitsFarbe = GELOESCHT_FARBE; break;
-	default: arbeitsFarbe = DEFAULT_FARBE;
-
+		}
+		forjSoll(0, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, () -> {
+			g.clearRect(0, 50, 520, HOEHE);
+			forkSoll(0, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, whenDone);
+		});
 	}
 
+	private void forjSoll(int j, Graphics gg, Datum datum, int vorgang, int tempo, Graphics g, Color arbeitsFarbe,
+			Image img, Runnable whenDone) {
+		if (j < ((datum.leseSollIndex() * (BREITE + 2)))) {
+			g.clearRect(0, 50, 520, HOEHE);
+			g.setColor(arbeitsFarbe);
+			g.fillRect(BEGINN + j, 50, BREITE, HOEHE);
+			g.setColor(Color.black);
+			g.drawString(datum.schluesselToString(), BEGINN + ((BREITE / 2) - 16) + j, 65);
+			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+			g.drawString(datum.sollIndexToString(), BEGINN + ((BREITE / 2) - 16) + j, 85);
+			pause(tempo, (e) -> {
+				gg.drawImage(img, 0, -2, me);
+				forjSoll(j + 2, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, whenDone);
+			});
+		} else {
+			whenDone.run();
+		}
+	}
 	
-	for (int j=0;j<((datum.leseSollIndex()*(BREITE+2)));j=j+2) {
-
-	    g.clearRect(0 , 50 , 520 , HOEHE);
-	    g.setColor(arbeitsFarbe);
-	    g.fillRect(BEGINN+j , 50 , BREITE , HOEHE);
-       	    g.setColor(Color.black);
-       	    g.drawString(datum.schluesselToString() , BEGINN+((BREITE/2)-16)+j , 65);
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-	    g.drawString(datum.sollIndexToString() , BEGINN+((BREITE/2)-16)+j , 85);
-	    
-	   
-	    try {
-		Thread.sleep(tempo);
-	    }
-	    catch (InterruptedException ie) {}
-	    
-        gg.drawImage(img,0,-2,this);
-      
-	}
-	g.clearRect(0 , 50 , 520 , HOEHE);
-	for (int j=0;j<40;j=j+2) {
-	    if(j>=37){j=39;}
-
-	    g.clearRect(BEGINN+(datum.leseSollIndex()*(BREITE+2)) , 50 , BREITE , 39);
-	    g.setColor(arbeitsFarbe);
-	    g.fillRect(BEGINN+(datum.leseSollIndex()*(BREITE+2)) , 50+j , BREITE, HOEHE);
-	    g.setColor(Color.black);
-	    g.drawString(datum.schluesselToString(), BEGINN+(datum.leseSollIndex()*(BREITE+2))+((BREITE/2)-16) , 65+j);
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-	    g.drawString(datum.sollIndexToString(), BEGINN+(datum.leseSollIndex()*(BREITE+2))+((BREITE/2)-16) , 85+j);
-
-	    
-	    try {
-		Thread.sleep(tempo);
-	    }
-	    catch (InterruptedException ie) {}
-	    
-	    
-	    gg.drawImage(img,0,-2,this);
-	 
-	}
-
-    }
-
-    /**
-     * zeichnet den Weg von &uuml;ber der Tabelle in die Istposition
-     * @param g die Graphik
-     * @param datum das zu zeichnende Datum
-     * @param ort die Istposition
-     * @param vorgang f&uuml;r die Farbgebung
-     * @param tempo die Filmgeschwindigkeit
-     */
-    private void zeichneIst(Graphics gg, Datum datum, int ort, int vorgang, int tempo, Graphics g) {
-	Color arbeitsFarbe;
-
-        Image img = createImage(BREITE,HOEHE+3);
-        //Graphics g = img.getGraphics();-->Sonderfall
-
-
-
-	switch( vorgang ) {
-
-	case EINFUEGEN: arbeitsFarbe = BESETZT_FARBE;   break;
-	case SUCHEN   : arbeitsFarbe = SUCH_FARBE;      break;
-	case LOESCHEN : arbeitsFarbe = GELOESCHT_FARBE; break;
-	default: arbeitsFarbe = DEFAULT_FARBE;
+	private void forkSoll(int k, Graphics gg, Datum datum, int vorgang, int tempo, Graphics g, Color arbeitsFarbe,
+			Image img, Runnable whenDone) {
+		if (k < 40) {
+			if (k >= 37) {
+				k = 39;
+			}
+			g.clearRect(BEGINN + (datum.leseSollIndex() * (BREITE + 2)), 50, BREITE, 39);
+			g.setColor(arbeitsFarbe);
+			g.fillRect(BEGINN + (datum.leseSollIndex() * (BREITE + 2)), 50 + k, BREITE, HOEHE);
+			g.setColor(Color.black);
+			g.drawString(datum.schluesselToString(),
+					BEGINN + (datum.leseSollIndex() * (BREITE + 2)) + ((BREITE / 2) - 16), 65 + k);
+			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+			g.drawString(datum.sollIndexToString(),
+					BEGINN + (datum.leseSollIndex() * (BREITE + 2)) + ((BREITE / 2) - 16), 85 + k);
+			int newk = k + 2;
+			pause(tempo, (e) -> {
+				gg.drawImage(img, 0, -2, me);
+				forkSoll(newk, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, whenDone);
+			});
+		} else {
+			whenDone.run();
+		}
 
 	}
 
-	for(int j=0;j<41;j=j+3) {
-	    g.clearRect(0, 0 , BREITE , HOEHE+3);
-	    g.setColor(arbeitsFarbe);
-	    g.fillRect(0 , 3 , BREITE , HOEHE);
-	    g.setColor(Color.black);
-	    g.drawString(datum.schluesselToString() ,(BREITE/2)-16 , 15+3 );
-	    g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-		g.drawString(datum.sollIndexToString() , (BREITE/2)-16 , 35+3 );
-		
-		 //LS Test
-	    try {
-		Thread.sleep(tempo);
-	    }
-	    catch (InterruptedException ie) {}
-	    
-	    
-	    gg.drawImage(img,BEGINN+(ort*(BREITE+2)),83+j,this);
-	}
-	gg.drawImage(img,0,83+41,this);
-	// g.clearRect(BEGINN+(ort*(BREITE+2)) , 68+41 , BREITE , HOEHE);
-    }
 
-    /**
-     * zeichnet den Weg von der Sollposition zur Istposition
-     * @param g die Graphik
-     * @param datum das zu zeichnende Datum
-     * @param ort ab wo verschoben wird
-     * @param verschiebeUmFelder um wieviel Felder verschoben werden soll
-     * @param vorgang f&uuml;r die Farbgebung
-     * @param tempo die Filmgeschwindigkeit
-     */
-    private void zeichneVerschieben(Graphics gg, Datum datum, int ort, int verschiebeUmFelder, int vorgang, int tempo, Graphics g) {
 
-        Image img = createImage(520,HOEHE+89);
-        //Graphics g = img.getGraphics();-->Sonderfall
+	/**
+	 * zeichnet den Weg von &uuml;ber der Tabelle in die Istposition
+	 * 
+	 * @param g       die Graphik
+	 * @param datum   das zu zeichnende Datum
+	 * @param ort     die Istposition
+	 * @param vorgang f&uuml;r die Farbgebung
+	 * @param tempo   die Filmgeschwindigkeit
+	 */
+	private void zeichneIst(Graphics gg, Datum datum, int ort, int vorgang, int tempo, Graphics g, Runnable r) {
+		Color arbeitsFarbe;
 
-     
-	try {
-	    Thread.sleep(PAUSE);
-	}
-	catch (InterruptedException ie) {}
-	
-        
-    repaint();
-	 
-	Color arbeitsFarbe;
+		Image img = createImage(BREITE, HOEHE + 3);
+		// Graphics g = img.getGraphics();-->Sonderfall
 
-	switch( vorgang ) {
+		switch (vorgang) {
 
-	case EINFUEGEN: arbeitsFarbe = BESETZT_FARBE;   break;
-	case SUCHEN   : arbeitsFarbe = SUCH_FARBE;      break;
-	case LOESCHEN : arbeitsFarbe = GELOESCHT_FARBE; break;
-	default: arbeitsFarbe = DEFAULT_FARBE;
+		case EINFUEGEN:
+			arbeitsFarbe = BESETZT_FARBE;
+			break;
+		case SUCHEN:
+			arbeitsFarbe = SUCH_FARBE;
+			break;
+		case LOESCHEN:
+			arbeitsFarbe = GELOESCHT_FARBE;
+			break;
+		default:
+			arbeitsFarbe = DEFAULT_FARBE;
 
+		}
+		forjIst(0, arbeitsFarbe, img, gg, datum, ort, vorgang, tempo, g, r);
 	}
 
-	int k=0;
-	for(int i=0;i<verschiebeUmFelder*(BREITE+2);i=i+3) {
-	    g.clearRect(0 , 89 , 520 , HOEHE);
-
-	    if(BEGINN+(ort*(BREITE+2))+i < verschiebeUeberRand) {
-
-		g.setColor(arbeitsFarbe);
-		g.fillRect(BEGINN+(ort*(BREITE+2))+i , 89 , BREITE, HOEHE);
-		g.setColor(Color.black);
-		g.drawString(datum.schluesselToString() , BEGINN+(ort*(BREITE+2))+(BREITE/2)-16+i , 89+15 );
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-		g.drawString(datum.sollIndexToString() , BEGINN+(ort*(BREITE+2))+(BREITE/2)-16+i , 89+35 );
-	    }
-	    if(BEGINN+(ort*(BREITE+2))+i >= verschiebeUeberRand-(BREITE+2)) {
-		k=k+3;
-		if( k>20 && (k+3)%verschiebeUeberRand<10) {k=0;}
-		g.setColor(arbeitsFarbe);
-		g.fillRect(BEGINN-(BREITE+2)+k, 89, BREITE , HOEHE);
-		g.setColor(Color.black);
-		g.drawString(datum.schluesselToString() , BEGINN-(BREITE+2)+(BREITE/2)-16+k , 89+15 );
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-		g.drawString(datum.sollIndexToString() , BEGINN-(BREITE+2)+(BREITE/2)-16+k , 89+35 );
-	    }
-	    
-	    //LS Test
-	    
-	    try {
-		Thread.sleep(tempo);
-	    }
-	    catch (InterruptedException ie) {}
-	    
-        gg.drawImage(img,0,-3,this);
+	private void forjIst(int j, Color arbeitsFarbe, Image img, Graphics gg, Datum datum, int ort, int vorgang, int tempo, Graphics g, Runnable r) {
+		if (j < 41) {
+			g.clearRect(0, 0, BREITE, HOEHE + 3);
+			g.setColor(arbeitsFarbe);
+			g.fillRect(0, 3, BREITE, HOEHE);
+			g.setColor(Color.black);
+			g.drawString(datum.schluesselToString(), (BREITE / 2) - 16, 15 + 3);
+			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+			g.drawString(datum.sollIndexToString(), (BREITE / 2) - 16, 35 + 3);
+			pause(tempo, (e) -> {			
+				gg.drawImage(img, BEGINN + (ort * (BREITE + 2)), 83 + j, me);
+				forjIst(j + 3, arbeitsFarbe, img, gg, datum, ort, vorgang, tempo, g, r);
+			});
+		} else {
+			gg.drawImage(img, 0, 83 + 41, me);
+			r.run();
+		}
 	}
-	g.clearRect(0 , 89 , 520 , HOEHE);
-	g.setColor(arbeitsFarbe);
-	g.fillRect(BEGINN+( ((ort+verschiebeUmFelder)%FELD_ANZAHL)*(BREITE+2)) , 89 , BREITE ,  HOEHE);
-	g.setColor(Color.black);
-	g.drawString(datum.schluesselToString() , BEGINN+( ((ort+verschiebeUmFelder)%FELD_ANZAHL)*(BREITE+2)) + (BREITE/2)-16 , 89+15);
-	g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-	g.drawString(datum.sollIndexToString() , BEGINN+( ((ort+verschiebeUmFelder)%FELD_ANZAHL)*(BREITE+2)) + (BREITE/2)-16 , 89+35);
-	gg.drawImage(img,0,-3,this);
-    }
 
-    /**
+
+	/**
+	 * zeichnet den Weg von der Sollposition zur Istposition
+	 * 
+	 * @param g                  die Graphik
+	 * @param datum              das zu zeichnende Datum
+	 * @param ort                ab wo verschoben wird
+	 * @param verschiebeUmFelder um wieviel Felder verschoben werden soll
+	 * @param vorgang            f&uuml;r die Farbgebung
+	 * @param tempo              die Filmgeschwindigkeit
+	 */
+	private void zeichneVerschieben(Graphics gg, Datum datum, int ort, int verschiebeUmFelder, int vorgang, int tempo,
+			Graphics g, Runnable whenDone) {
+
+		Image img = createImage(520, HOEHE + 89);
+		// Graphics g = img.getGraphics();-->Sonderfall
+
+		pause(PAUSE, (e) -> {
+			repaint();
+			Color arbeitsFarbe;
+
+			switch (vorgang) {
+
+			case EINFUEGEN:
+				arbeitsFarbe = BESETZT_FARBE;
+				break;
+			case SUCHEN:
+				arbeitsFarbe = SUCH_FARBE;
+				break;
+			case LOESCHEN:
+				arbeitsFarbe = GELOESCHT_FARBE;
+				break;
+			default:
+				arbeitsFarbe = DEFAULT_FARBE;
+
+			}
+			foriVerschieben(0, 0, gg, datum, ort, verschiebeUmFelder, vorgang, tempo, arbeitsFarbe, img, () -> {
+				g.clearRect(0, 89, 520, HOEHE);
+				g.setColor(arbeitsFarbe);
+				g.fillRect(BEGINN + (((ort + verschiebeUmFelder) % FELD_ANZAHL) * (BREITE + 2)), 89, BREITE, HOEHE);
+				g.setColor(Color.black);
+				g.drawString(datum.schluesselToString(),
+						BEGINN + (((ort + verschiebeUmFelder) % FELD_ANZAHL) * (BREITE + 2)) + (BREITE / 2) - 16, 89 + 15);
+				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+				g.drawString(datum.sollIndexToString(),
+						BEGINN + (((ort + verschiebeUmFelder) % FELD_ANZAHL) * (BREITE + 2)) + (BREITE / 2) - 16, 89 + 35);
+				gg.drawImage(img, 0, -3, me);
+				whenDone.run();				
+			});
+		});
+	}
+
+    private void foriVerschieben(int k, int i, Graphics gg, Datum datum, int ort, int verschiebeUmFelder, int vorgang, int tempo,
+			Color arbeitsFarbe, Image img, Runnable whenDone) {
+    	if (i < verschiebeUmFelder * (BREITE + 2)) {
+			g.clearRect(0, 89, 520, HOEHE);
+
+			if (BEGINN + (ort * (BREITE + 2)) + i < verschiebeUeberRand) {
+
+				g.setColor(arbeitsFarbe);
+				g.fillRect(BEGINN + (ort * (BREITE + 2)) + i, 89, BREITE, HOEHE);
+				g.setColor(Color.black);
+				g.drawString(datum.schluesselToString(), BEGINN + (ort * (BREITE + 2)) + (BREITE / 2) - 16 + i,
+						89 + 15);
+				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+				g.drawString(datum.sollIndexToString(), BEGINN + (ort * (BREITE + 2)) + (BREITE / 2) - 16 + i, 89 + 35);
+			}
+			if (BEGINN + (ort * (BREITE + 2)) + i >= verschiebeUeberRand - (BREITE + 2)) {
+				k = k + 3;
+				if (k > 20 && (k + 3) % verschiebeUeberRand < 10) {
+					k = 0;
+				}
+				g.setColor(arbeitsFarbe);
+				g.fillRect(BEGINN - (BREITE + 2) + k, 89, BREITE, HOEHE);
+				g.setColor(Color.black);
+				g.drawString(datum.schluesselToString(), BEGINN - (BREITE + 2) + (BREITE / 2) - 16 + k, 89 + 15);
+				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+				g.drawString(datum.sollIndexToString(), BEGINN - (BREITE + 2) + (BREITE / 2) - 16 + k, 89 + 35);
+			}
+			int kFinal = k;
+			pause(tempo, (e) -> {
+				gg.drawImage(img, 0, -3, me);
+				foriVerschieben(i + 3, kFinal, gg, datum, ort, verschiebeUmFelder, vorgang, tempo, arbeitsFarbe, img, whenDone);
+			});
+    	} else {
+    		whenDone.run();
+    	}
+	}
+
+
+	/**
      * Zeichnet im nicht interaktiven Modus die Tabelle<br>
      * Zeichnet im interaktiven Modus die Tabelle, die zus&auml;tzlichen
      * Kontrollfelder und das Datum
@@ -853,9 +926,9 @@ class HashTabelle extends Panel implements Runnable {
 	
 	switch(methode) {
 	    
-	case 1: return this.kontrolliereMethodeEins(interDatum, vorgang);
-	case 2: return this.kontrolliereMethodeZwei(interDatum, vorgang);
-	case 3: return this.kontrolliereMethodeDrei(interDatum, vorgang);
+	case 1: return kontrolliereMethodeEins(interDatum, vorgang);
+	case 2: return kontrolliereMethodeZwei(interDatum, vorgang);
+	case 3: return kontrolliereMethodeDrei(interDatum, vorgang);
 	    
 	} //Ende switch Methode
 	
@@ -893,7 +966,7 @@ class HashTabelle extends Panel implements Runnable {
 
 	} else {
 
-	    this.setzeNichtInteraktiverModus();
+	    setzeNichtInteraktiverModus();
 	    return false;
 
 	}
@@ -909,8 +982,8 @@ class HashTabelle extends Panel implements Runnable {
      */
     private boolean kontrolliereMethodeEins(Datum interDatum, int vorgang) {
 	
-	int tmp = interDatum.leseSollIndex();
-	int count = 0;
+	tmp = interDatum.leseSollIndex();
+    count = 0;
 	
 	if (vorgang == EINFUEGEN) {
 	    
@@ -929,7 +1002,7 @@ class HashTabelle extends Panel implements Runnable {
 		
 	    }
 
-	    return this.bestimmeErgebnis();
+	    return bestimmeErgebnis();
 	    
 	} else {
 	    
@@ -949,7 +1022,7 @@ class HashTabelle extends Panel implements Runnable {
 
 	    }
  
-	    return this.bestimmeErgebnis();
+	    return bestimmeErgebnis();
 
 	} // Ende else if (vorgang == EINFUEGEN)
 	
@@ -965,8 +1038,8 @@ class HashTabelle extends Panel implements Runnable {
      */
     private boolean kontrolliereMethodeZwei(Datum interDatum, int vorgang) {
 	
-	int tmp = interDatum.leseSollIndex();
-	int count = 0;
+	tmp = interDatum.leseSollIndex();
+	count = 0;
 	
 	if (vorgang == EINFUEGEN) {
 	    
@@ -985,7 +1058,7 @@ class HashTabelle extends Panel implements Runnable {
 
 	    }
 	    
-	    return this.bestimmeErgebnis();
+	    return bestimmeErgebnis();
 	    
 	} else {
 	    
@@ -1005,7 +1078,7 @@ class HashTabelle extends Panel implements Runnable {
 
 	    }
 	    
-	    return this.bestimmeErgebnis();
+	    return bestimmeErgebnis();
 	    
 	} //Ende else if (vorgang == EINFUEGEN)
 	
@@ -1020,8 +1093,8 @@ class HashTabelle extends Panel implements Runnable {
      */
     private boolean kontrolliereMethodeDrei( Datum interDatum, int vorgang) {
 	
-	int tmp = interDatum.leseSollIndex();
-	int count = 0;
+	tmp = interDatum.leseSollIndex();
+	count = 0;
 	
 	if (vorgang == EINFUEGEN) {
 	    
@@ -1040,7 +1113,7 @@ class HashTabelle extends Panel implements Runnable {
 
 	    }
 	    
-	    return this.bestimmeErgebnis();
+	    return bestimmeErgebnis();
 	    
 	} else {
 	    
@@ -1060,7 +1133,7 @@ class HashTabelle extends Panel implements Runnable {
 
 	    }
 	    
-	    return this.bestimmeErgebnis();
+	    return bestimmeErgebnis();
 	    
 	} //Ende else if (vorgang == EINFUEGEN)
 	
