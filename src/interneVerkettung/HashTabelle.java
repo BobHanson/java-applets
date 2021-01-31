@@ -34,7 +34,7 @@ class HashTabelle extends Panel implements Runnable {
     private static final int EINFUEGEN = 1;
     private static final int SUCHEN    = 2;
     private static final int LOESCHEN  = 3;
-    private static final int PAUSE     = 50;// was 500
+    private static final int PAUSE     = 500;
 	
     /**
      * F&uuml;r die Instanz g&uuml;tige Variablen
