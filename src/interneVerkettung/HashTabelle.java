@@ -1,9 +1,12 @@
 package interneVerkettung;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Panel;
+import java.awt.Rectangle;
 import java.awt.event.ActionListener;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import javax.swing.Timer;
@@ -31,9 +34,8 @@ class HashTabelle extends Panel implements Runnable {
     private static final int EINFUEGEN = 1;
     private static final int SUCHEN    = 2;
     private static final int LOESCHEN  = 3;
-    private static final int PAUSE     = 500;
-    
-
+    private static final int PAUSE     = 50;// was 500
+	
     /**
      * F&uuml;r die Instanz g&uuml;tige Variablen
      */
@@ -125,39 +127,6 @@ class HashTabelle extends Panel implements Runnable {
 
 	}
 
-	int state;
-
-	final static int SM1 = 1;
-	final static int SM2 = 2;
-	final static int SM3 = 3;
-	
-	/**
-     * Zeichnet im nicht interaktiven Modus die Tabelle<br>
-     * Zeichnet im interaktiven Modus die Tabelle, die zus&auml;tzlichen
-     * Kontrollfelder und das Datum
-     * @param g die Graphik
-     */
-    public void paint(Graphics g) {
-    	switch (state) {
-    	case SM1:
-			sondierMethodeEins(datum, vorgang, tempo, g, ret);
-			break;
-    	case SM2:
-			sondierMethodeZwei(datum, vorgang, tempo, g, ret);
-			break;
-    	case SM3:
-			sondierMethodeDrei(datum, vorgang, tempo, g, ret);
-			break;
-    	}
-    }	
-    	
-  
-    Datum datum;
-    int methode;
-    int vorgang;
-    int tempo;
-    Consumer<String> ret;
-    
 
 	/**
 	 * Die Sondiermethode und der Vorgang werden bestimmt.
@@ -169,24 +138,15 @@ class HashTabelle extends Panel implements Runnable {
 	 * @return das Ergebnis der Aufgabe
 	 */
 	public void sondierMethode(Datum datum, int methode, int vorgang, int tempo, Consumer<String> ret) {
-		this.datum = datum;
-		this.methode = methode;
-		this.vorgang = vorgang;
-		this.tempo = tempo;
-		this.ret = ret;
 		switch (methode) {
 		case 1:
-			state = SM1;
-			repaint();
-			break;
+			sondierMethodeEins(datum, vorgang, tempo, ret);
+			return;
 		case 2:
-			state = SM2;
-			repaint();
-			break;
+			sondierMethodeZwei(datum, vorgang, tempo, ret);
+			return;
 		case 3:
-			state = SM3;
-			repaint();
-			break;
+			sondierMethodeDrei(datum, vorgang, tempo, ret);
 		}
 		ret.accept("OHA");
 	}
@@ -203,9 +163,9 @@ class HashTabelle extends Panel implements Runnable {
 	 * @param ret
 	 * @return das Ergebnis der Aufgabe
 	 */
-	private void sondierMethodeEins(Datum datum, int vorgang, int tempo, Graphics g, Consumer<String> ret) {
+	private void sondierMethodeEins(Datum datum, int vorgang, int tempo,  Consumer<String> ret) {
 
-		zeichneSoll(g, datum, vorgang, tempo, g, () -> {
+		zeichneSoll(datum, vorgang, tempo, () -> {
 
 			tmp = datum.leseSollIndex();
 			count = 0;
@@ -217,7 +177,7 @@ class HashTabelle extends Panel implements Runnable {
 						if ((tabelle[tmp].leseSchluessel() == FREI || tabelle[tmp].leseSchluessel() == GELOESCHT)
 								&& count < FELD_ANZAHL) {
 							tabelle[tmp] = datum;
-							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+							zeichneIst(datum, tmp, vorgang, tempo, () -> {
 								ret.accept(Integer.toString(tmp));
 							});
 							return;
@@ -226,7 +186,7 @@ class HashTabelle extends Panel implements Runnable {
 					case SUCHEN:
 						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
 								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
-							// zeichneIst(g, datum, tmp, vorgang, tempo);
+							// zeichneIst(datum, tmp, vorgang, tempo);
 							ret.accept(Integer.toString(tmp));
 							return;
 						}
@@ -234,7 +194,7 @@ class HashTabelle extends Panel implements Runnable {
 					case LOESCHEN:
 						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
 								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
-							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+							zeichneIst(datum, tmp, vorgang, tempo, () -> {
 								tabelle[tmp].setzeGeloescht();
 								ret.accept(Integer.toString(tmp));
 
@@ -248,41 +208,41 @@ class HashTabelle extends Panel implements Runnable {
 
 			};
 			if (vorgang == EINFUEGEN) {
-				whileEinsEinfuegen(datum, vorgang, tempo, g, whenDone);
+				whileEinsEinfuegen(datum, vorgang, tempo, whenDone);
 			} else {
-				whileEins(datum, vorgang, tempo, g, whenDone);
+				whileEins(datum, vorgang, tempo, whenDone);
 			}
 		});
 	}
 
-	private void whileEinsEinfuegen(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+	private void whileEinsEinfuegen(Datum datum, int vorgang, int tempo,  Runnable whenDone) {
 		if (tabelle[tmp].leseSchluessel() > FREI && count < FELD_ANZAHL - 1) {
 			int verschiebeUmFelder = 1;
-			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+			zeichneVerschieben(datum, tmp, verschiebeUmFelder, vorgang, tempo, () -> {
 				tmp = (tmp + 1) % FELD_ANZAHL;
 				count++;
-				whileEinsEinfuegen(datum, vorgang, tempo, g, whenDone);
+				whileEinsEinfuegen(datum, vorgang, tempo, whenDone);
 			});
 		} else {
 			whenDone.run();
 		}
 	}
 	
-	private void whileEins(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+	private void whileEins(Datum datum, int vorgang, int tempo,  Runnable whenDone) {
 		if ((tabelle[tmp].leseSollIndex() != FREI && tabelle[tmp].leseSchluessel() != datum.leseSchluessel())
 				&& count < FELD_ANZAHL - 1) {
 			int verschiebeUmFelder = 1;
-			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+			zeichneVerschieben(datum, tmp, verschiebeUmFelder, vorgang, tempo, () -> {
 				tmp = (tmp + 1) % FELD_ANZAHL;
 				count++;
-				whileEins(datum, vorgang, tempo, g, whenDone);
+				whileEins(datum, vorgang, tempo, whenDone);
 			});
 		} else {
 			whenDone.run();
 		}
 	}
 
-	private void pause(int delay, ActionListener listener) {
+	private static void pause(int delay, ActionListener listener) {
     	Timer t = new Timer(delay, listener);
     	t.setRepeats(false);
     	t.start();
@@ -298,9 +258,9 @@ class HashTabelle extends Panel implements Runnable {
 	 * @param ret
 	 * @return das Ergebnis der Aufgabe
 	 */
-	private void sondierMethodeZwei(Datum datum, int vorgang, int tempo, Graphics g, Consumer<String> ret) {
+	private void sondierMethodeZwei(Datum datum, int vorgang, int tempo,  Consumer<String> ret) {
 
-		zeichneSoll(g, datum, vorgang, tempo, g, () -> {
+		zeichneSoll(datum, vorgang, tempo, () -> {
 
 			tmp = datum.leseSollIndex();
 			count = 0;
@@ -312,7 +272,7 @@ class HashTabelle extends Panel implements Runnable {
 						if ((tabelle[tmp].leseSchluessel() == FREI || tabelle[tmp].leseSchluessel() == GELOESCHT)
 								&& count < FELD_ANZAHL) {
 							tabelle[tmp] = datum;
-							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+							zeichneIst(datum, tmp, vorgang, tempo, () -> {
 								ret.accept(Integer.toString(tmp));
 							});
 							return;
@@ -321,7 +281,7 @@ class HashTabelle extends Panel implements Runnable {
 					case SUCHEN:
 						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
 								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
-							// zeichneIst(g, datum, tmp, vorgang, tempo);
+							// zeichneIst(datum, tmp, vorgang, tempo);
 							ret.accept(Integer.toString(tmp));
 							return;
 						}
@@ -329,7 +289,7 @@ class HashTabelle extends Panel implements Runnable {
 					case LOESCHEN:
 						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
 								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
-							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+							zeichneIst(datum, tmp, vorgang, tempo, () -> {
 								tabelle[tmp].setzeGeloescht();
 								ret.accept(Integer.toString(tmp));
 							});
@@ -341,21 +301,21 @@ class HashTabelle extends Panel implements Runnable {
 				});
 			};
 			if (vorgang == EINFUEGEN) {
-				whileZweiEinfuegen(datum, vorgang, tempo, g, whenDone);
+				whileZweiEinfuegen(datum, vorgang, tempo, whenDone);
 			} else {
-				whileZwei(datum, vorgang, tempo, g, whenDone);
+				whileZwei(datum, vorgang, tempo, whenDone);
 			}
 		});
 	}
 
-	private void whileZweiEinfuegen(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+	private void whileZweiEinfuegen(Datum datum, int vorgang, int tempo,  Runnable whenDone) {
 		if (tabelle[tmp].leseSchluessel() > FREI && count < FELD_ANZAHL - 1) {
 			count++;
 			int verschiebeUmFelder = (datum.leseSollIndex() + (count * 2))
 					- (datum.leseSollIndex() + ((count - 1) * 2));
-			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+			zeichneVerschieben(datum, tmp, verschiebeUmFelder, vorgang, tempo, () -> {
 			tmp = (datum.leseSollIndex() + (count * 2)) % FELD_ANZAHL;
-			whileZweiEinfuegen(datum, vorgang, tempo, g, whenDone);
+			whileZweiEinfuegen(datum, vorgang, tempo, whenDone);
 			});
 		} else {
 			whenDone.run();
@@ -363,15 +323,15 @@ class HashTabelle extends Panel implements Runnable {
 	}
 
 
-	private void whileZwei(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+	private void whileZwei(Datum datum, int vorgang, int tempo,  Runnable whenDone) {
 		if (tabelle[tmp].leseSollIndex() != FREI && tabelle[tmp].leseSchluessel() != datum.leseSchluessel()
 				&& count < FELD_ANZAHL - 1) {
 			count++;
 			int verschiebeUmFelder = (datum.leseSollIndex() + (count * 2))
 					- (datum.leseSollIndex() + ((count - 1) * 2));
-			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+			zeichneVerschieben(datum, tmp, verschiebeUmFelder, vorgang, tempo, () -> {
 				tmp = (datum.leseSollIndex() + (count * 2)) % FELD_ANZAHL;
-				whileZwei(datum, vorgang, tempo, g, whenDone);
+				whileZwei(datum, vorgang, tempo, whenDone);
 			});
 		} else {
 			whenDone.run();
@@ -388,9 +348,9 @@ class HashTabelle extends Panel implements Runnable {
 	 * @param ret
 	 * @return das Ergebnis der Aufgabe
 	 */
-	private void sondierMethodeDrei(Datum datum, int vorgang, int tempo, Graphics g, Consumer<String> ret) {
+	private void sondierMethodeDrei(Datum datum, int vorgang, int tempo,  Consumer<String> ret) {
 
-		zeichneSoll(g, datum, vorgang, tempo, g, () -> {
+		zeichneSoll(datum, vorgang, tempo, () -> {
 
 			tmp = datum.leseSollIndex();
 			count = 0;
@@ -402,7 +362,7 @@ class HashTabelle extends Panel implements Runnable {
 						if ((tabelle[tmp].leseSchluessel() == FREI || tabelle[tmp].leseSchluessel() == GELOESCHT)
 								&& count < FELD_ANZAHL) {
 							tabelle[tmp] = datum;
-							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+							zeichneIst(datum, tmp, vorgang, tempo, () -> {
 								ret.accept(Integer.toString(tmp));
 							});
 							return;
@@ -411,7 +371,7 @@ class HashTabelle extends Panel implements Runnable {
 					case SUCHEN:
 						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
 								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
-							// zeichneIst(g, datum, tmp, vorgang, tempo);
+							// zeichneIst(datum, tmp, vorgang, tempo);
 							ret.accept(Integer.toString(tmp));
 							return;
 						}
@@ -419,7 +379,7 @@ class HashTabelle extends Panel implements Runnable {
 					case LOESCHEN:
 						if (tabelle[tmp].leseSollIndex() == datum.leseSollIndex()
 								&& tabelle[tmp].leseSchluessel() == datum.leseSchluessel()) {
-							zeichneIst(g, datum, tmp, vorgang, tempo, g, () -> {
+							zeichneIst(datum, tmp, vorgang, tempo, () -> {
 								tabelle[tmp].setzeGeloescht();
 								ret.accept(Integer.toString(tmp));
 							});
@@ -432,35 +392,35 @@ class HashTabelle extends Panel implements Runnable {
 			};
 
 			if (vorgang == EINFUEGEN) {
-				whileDreiEinguegen(datum, vorgang, tempo, g, whenDone);
+				whileDreiEinguegen(datum, vorgang, tempo, whenDone);
 			} else {
-				whileDrei(datum, vorgang, tempo, g, whenDone);
+				whileDrei(datum, vorgang, tempo, whenDone);
 			}
 		});
 	}
 
-	private void whileDreiEinguegen(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+	private void whileDreiEinguegen(Datum datum, int vorgang, int tempo,  Runnable whenDone) {
     	if (tabelle[tmp].leseSchluessel() > FREI && count < ((FELD_ANZAHL + 1) / 2 - 1)) {
 			count++;
 			int verschiebeUmFelder = (datum.leseSollIndex() + ((int) Math.pow(count, 2)))
 					- (datum.leseSollIndex() + ((int) Math.pow((count - 1), 2)));
-			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+			zeichneVerschieben(datum, tmp, verschiebeUmFelder, vorgang, tempo, () -> {
 				tmp = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) % FELD_ANZAHL;
-				whileDreiEinguegen(datum, vorgang, tempo, g, whenDone);
+				whileDreiEinguegen(datum, vorgang, tempo, whenDone);
 			});
 		}
 		whenDone.run();
 	}
 
-	private void whileDrei(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
+	private void whileDrei(Datum datum, int vorgang, int tempo,  Runnable whenDone) {
 		if ((tabelle[tmp].leseSollIndex() != FREI && tabelle[tmp].leseSchluessel() != datum.leseSchluessel())
 				&& count < ((FELD_ANZAHL + 1) / 2 - 1)) {
 			count++;
 			int verschiebeUmFelder = (datum.leseSollIndex() + ((int) Math.pow(count, 2)))
 					- (datum.leseSollIndex() + ((int) Math.pow((count - 1), 2)));
-			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
+			zeichneVerschieben(datum, tmp, verschiebeUmFelder, vorgang, tempo, () -> {
 				tmp = (datum.leseSollIndex() + ((int) Math.pow(count, 2))) % FELD_ANZAHL;
-				whileDrei(datum, vorgang, tempo, g, whenDone);
+				whileDrei(datum, vorgang, tempo, whenDone);
 			});
 		} else {
 			whenDone.run();
@@ -479,14 +439,14 @@ class HashTabelle extends Panel implements Runnable {
 	 * @param vorgang f&uuml;r die Farbgebung
 	 * @param tempo   die Filmgeschwindigkeit
 	 */
-	private void zeichneSoll(Graphics gg, Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
-		System.out.println(g);
-		System.out.println(gg);
+	private void zeichneSoll(Datum datum, int vorgang, int tempo, Runnable whenDone) {
 
 		Color arbeitsFarbe;
 
 		Image img = createImage(520, 128);
 		// Graphics g = img.getGraphics();-->Sonderfall
+
+        Graphics g = getGraphics();
 
 		g.clearRect(0, 0, 520, 128);
 
@@ -505,15 +465,16 @@ class HashTabelle extends Panel implements Runnable {
 			arbeitsFarbe = DEFAULT_FARBE;
 
 		}
-		forjSoll(0, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, () -> {
+		forjSoll(0,datum, vorgang, tempo, arbeitsFarbe, img, () -> {
 			g.clearRect(0, 50, 520, HOEHE);
-			forkSoll(0, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, whenDone);
+			forkSoll(0,datum, vorgang, tempo, arbeitsFarbe, img, whenDone);
 		});
 	}
 
-	private void forjSoll(int j, Graphics gg, Datum datum, int vorgang, int tempo, Graphics g, Color arbeitsFarbe,
+	private void forjSoll(int j,  Datum datum, int vorgang, int tempo,  Color arbeitsFarbe,
 			Image img, Runnable whenDone) {
 		if (j < ((datum.leseSollIndex() * (BREITE + 2)))) {
+			Graphics g = getGraphics();
 			g.clearRect(0, 50, 520, HOEHE);
 			g.setColor(arbeitsFarbe);
 			g.fillRect(BEGINN + j, 50, BREITE, HOEHE);
@@ -521,21 +482,25 @@ class HashTabelle extends Panel implements Runnable {
 			g.drawString(datum.schluesselToString(), BEGINN + ((BREITE / 2) - 16) + j, 65);
 			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
 			g.drawString(datum.sollIndexToString(), BEGINN + ((BREITE / 2) - 16) + j, 85);
+			g.dispose();
 			pause(tempo, (e) -> {
+				Graphics gg = getGraphics();
 				gg.drawImage(img, 0, -2, me);
-				forjSoll(j + 2, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, whenDone);
+				gg.dispose();
+				forjSoll(j + 2,datum, vorgang, tempo, arbeitsFarbe, img, whenDone);
 			});
 		} else {
 			whenDone.run();
 		}
 	}
 	
-	private void forkSoll(int k, Graphics gg, Datum datum, int vorgang, int tempo, Graphics g, Color arbeitsFarbe,
+	private void forkSoll(int k,  Datum datum, int vorgang, int tempo,  Color arbeitsFarbe,
 			Image img, Runnable whenDone) {
 		if (k < 40) {
 			if (k >= 37) {
 				k = 39;
 			}
+			Graphics g = getGraphics();
 			g.clearRect(BEGINN + (datum.leseSollIndex() * (BREITE + 2)), 50, BREITE, 39);
 			g.setColor(arbeitsFarbe);
 			g.fillRect(BEGINN + (datum.leseSollIndex() * (BREITE + 2)), 50 + k, BREITE, HOEHE);
@@ -545,10 +510,13 @@ class HashTabelle extends Panel implements Runnable {
 			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
 			g.drawString(datum.sollIndexToString(),
 					BEGINN + (datum.leseSollIndex() * (BREITE + 2)) + ((BREITE / 2) - 16), 85 + k);
+			g.dispose();
 			int newk = k + 2;
 			pause(tempo, (e) -> {
+				Graphics gg = getGraphics();
 				gg.drawImage(img, 0, -2, me);
-				forkSoll(newk, gg, datum, vorgang, tempo, g, arbeitsFarbe, img, whenDone);
+				gg.dispose();
+				forkSoll(newk,datum, vorgang, tempo, arbeitsFarbe, img, whenDone);
 			});
 		} else {
 			whenDone.run();
@@ -567,7 +535,7 @@ class HashTabelle extends Panel implements Runnable {
 	 * @param vorgang f&uuml;r die Farbgebung
 	 * @param tempo   die Filmgeschwindigkeit
 	 */
-	private void zeichneIst(Graphics gg, Datum datum, int ort, int vorgang, int tempo, Graphics g, Runnable r) {
+	private void zeichneIst( Datum datum, int ort, int vorgang, int tempo,  Runnable r) {
 		Color arbeitsFarbe;
 
 		Image img = createImage(BREITE, HOEHE + 3);
@@ -588,11 +556,12 @@ class HashTabelle extends Panel implements Runnable {
 			arbeitsFarbe = DEFAULT_FARBE;
 
 		}
-		forjIst(0, arbeitsFarbe, img, gg, datum, ort, vorgang, tempo, g, r);
+		forjIst(0, arbeitsFarbe, img,datum, ort, vorgang, tempo, r);
 	}
 
-	private void forjIst(int j, Color arbeitsFarbe, Image img, Graphics gg, Datum datum, int ort, int vorgang, int tempo, Graphics g, Runnable r) {
+	private void forjIst(int j, Color arbeitsFarbe, Image img,  Datum datum, int ort, int vorgang, int tempo,  Runnable r) {
 		if (j < 41) {
+			Graphics g = getGraphics();
 			g.clearRect(0, 0, BREITE, HOEHE + 3);
 			g.setColor(arbeitsFarbe);
 			g.fillRect(0, 3, BREITE, HOEHE);
@@ -600,12 +569,17 @@ class HashTabelle extends Panel implements Runnable {
 			g.drawString(datum.schluesselToString(), (BREITE / 2) - 16, 15 + 3);
 			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
 			g.drawString(datum.sollIndexToString(), (BREITE / 2) - 16, 35 + 3);
+			g.dispose();
 			pause(tempo, (e) -> {			
+				Graphics gg = getGraphics();
 				gg.drawImage(img, BEGINN + (ort * (BREITE + 2)), 83 + j, me);
-				forjIst(j + 3, arbeitsFarbe, img, gg, datum, ort, vorgang, tempo, g, r);
+				gg.dispose();
+				forjIst(j + 3, arbeitsFarbe, img,datum, ort, vorgang, tempo, r);
 			});
 		} else {
-			gg.drawImage(img, 0, 83 + 41, me);
+			Graphics g = getGraphics();
+			g.drawImage(img, 0, 83 + 41, me);
+			g.dispose();
 			r.run();
 		}
 	}
@@ -621,8 +595,8 @@ class HashTabelle extends Panel implements Runnable {
 	 * @param vorgang            f&uuml;r die Farbgebung
 	 * @param tempo              die Filmgeschwindigkeit
 	 */
-	private void zeichneVerschieben(Graphics gg, Datum datum, int ort, int verschiebeUmFelder, int vorgang, int tempo,
-			Graphics g, Runnable whenDone) {
+	private void zeichneVerschieben( Datum datum, int ort, int verschiebeUmFelder, int vorgang, int tempo,
+			 Runnable whenDone) {
 
 		Image img = createImage(520, HOEHE + 89);
 		// Graphics g = img.getGraphics();-->Sonderfall
@@ -646,7 +620,8 @@ class HashTabelle extends Panel implements Runnable {
 				arbeitsFarbe = DEFAULT_FARBE;
 
 			}
-			foriVerschieben(0, 0, gg, datum, ort, verschiebeUmFelder, vorgang, tempo, arbeitsFarbe, img, () -> {
+			foriVerschieben(0, 0,datum, ort, verschiebeUmFelder, vorgang, tempo, arbeitsFarbe, img, () -> {
+				Graphics g = getGraphics();
 				g.clearRect(0, 89, 520, HOEHE);
 				g.setColor(arbeitsFarbe);
 				g.fillRect(BEGINN + (((ort + verschiebeUmFelder) % FELD_ANZAHL) * (BREITE + 2)), 89, BREITE, HOEHE);
@@ -656,15 +631,17 @@ class HashTabelle extends Panel implements Runnable {
 				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
 				g.drawString(datum.sollIndexToString(),
 						BEGINN + (((ort + verschiebeUmFelder) % FELD_ANZAHL) * (BREITE + 2)) + (BREITE / 2) - 16, 89 + 35);
-				gg.drawImage(img, 0, -3, me);
+				g.drawImage(img, 0, -3, me);
+				g.dispose();
 				whenDone.run();				
 			});
 		});
 	}
 
-    private void foriVerschieben(int k, int i, Graphics gg, Datum datum, int ort, int verschiebeUmFelder, int vorgang, int tempo,
-			Color arbeitsFarbe, Image img, Runnable whenDone) {
+    private void foriVerschieben(int k, int i,  Datum datum, int ort, int verschiebeUmFelder, int vorgang, int tempo,
+			Color arbeitsFarbe, Image img,  Runnable whenDone) {
     	if (i < verschiebeUmFelder * (BREITE + 2)) {
+			Graphics g = getGraphics();
 			g.clearRect(0, 89, 520, HOEHE);
 
 			if (BEGINN + (ort * (BREITE + 2)) + i < verschiebeUeberRand) {
@@ -690,9 +667,12 @@ class HashTabelle extends Panel implements Runnable {
 				g.drawString(datum.sollIndexToString(), BEGINN - (BREITE + 2) + (BREITE / 2) - 16 + k, 89 + 35);
 			}
 			int kFinal = k;
+			g.dispose();
 			pause(tempo, (e) -> {
+				Graphics gg = getGraphics();
 				gg.drawImage(img, 0, -3, me);
-				foriVerschieben(i + 3, kFinal, gg, datum, ort, verschiebeUmFelder, vorgang, tempo, arbeitsFarbe, img, whenDone);
+				gg.dispose();
+				foriVerschieben(i + 3, kFinal,datum, ort, verschiebeUmFelder, vorgang, tempo, arbeitsFarbe, img, whenDone);
 			});
     	} else {
     		whenDone.run();
@@ -700,99 +680,112 @@ class HashTabelle extends Panel implements Runnable {
 	}
 
 
-	//paint im nicht Interaktiven-Modus**************************************
-	if (interaktiv == false) {
-	    
-		g.setColor(Color.white);
-    	g.fillRect(0,0,545,350);
-    	g.setColor(Color.black);
-    	//repaint();
-		
-		g.setColor(Color.black);
-	    g.fillRect(BEGINN-1,129,LAENGE+1,42);
+	/**
+	 * Zeichnet im nicht interaktiven Modus die Tabelle<br>
+	 * Zeichnet im interaktiven Modus die Tabelle, die zus&auml;tzlichen
+	 * Kontrollfelder und das Datum
+	 * 
+	 * @param g die Graphik
+	 */
+	public void paint(Graphics g) {
 
-	    for (int i=0; i<FELD_ANZAHL; i++) {
+		// paint im nicht Interaktiven-Modus**************************************
+		if (interaktiv == false) {
 
-		switch(tabelle[i].leseSchluessel()){
-		case -2 : g.setColor(GELOESCHT_FARBE); break;
-		case -1 : g.setColor(FREI_FARBE); break;
-		default : g.setColor(BESETZT_FARBE); break;
-		}
-		
-		
-		
-		
-		g.fillRect(BEGINN+(i*(BREITE+2)) , 130 , BREITE , HOEHE);
-		g.setColor(Color.black);
-		g.drawString(tabelle[i].schluesselToString() , BEGINN+((BREITE/2)-16)+(i*(BREITE+2)) , 145);
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-		g.drawString(tabelle[i].sollIndexToString() , BEGINN+((BREITE/2)-16)+(i*(BREITE+2)) , 165);
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-		g.drawString(Integer.toString(i) , BEGINN+((BREITE/2)-16)+(i*(BREITE+2)) , 195);
-	    }
+			g.setColor(Color.white);
+			g.fillRect(0, 0, 545, 350);
+			g.setColor(Color.black);
+			// repaint();
 
-	} // Ende paint im nicht Interaktiven-Modus******************************
+			g.setColor(Color.black);
+			g.fillRect(BEGINN - 1, 129, LAENGE + 1, 42);
 
-	//paint im Interaktiven-Modus********************************************
-	if (interaktiv == true) {
-		
-		
-		
-		
-	    g.setColor(Color.black);
-	    g.fillRect(BEGINN-1,129,LAENGE+1,42);
+			for (int i = 0; i < FELD_ANZAHL; i++) {
 
-	    for (int i=0; i<FELD_ANZAHL; i++) {
+				switch (tabelle[i].leseSchluessel()) {
+				case -2:
+					g.setColor(GELOESCHT_FARBE);
+					break;
+				case -1:
+					g.setColor(FREI_FARBE);
+					break;
+				default:
+					g.setColor(BESETZT_FARBE);
+					break;
+				}
 
-		switch(tabelle[i].leseSchluessel()){
-		case -2 : if (tabelle[i].leseMarkiert() == false) {
-		    g.setColor(GELOESCHT_FARBE);
-		} else {
-		    g.setColor(MARKIERT_FARBE);
-		} break;
-		case -1 : if (tabelle[i].leseMarkiert() == false) {
-		    g.setColor(FREI_FARBE);
-		} else {
+				g.fillRect(BEGINN + (i * (BREITE + 2)), 130, BREITE, HOEHE);
+				g.setColor(Color.black);
+				g.drawString(tabelle[i].schluesselToString(), BEGINN + ((BREITE / 2) - 16) + (i * (BREITE + 2)), 145);
+				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+				g.drawString(tabelle[i].sollIndexToString(), BEGINN + ((BREITE / 2) - 16) + (i * (BREITE + 2)), 165);
+				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+				g.drawString(Integer.toString(i), BEGINN + ((BREITE / 2) - 16) + (i * (BREITE + 2)), 195);
+			}
 
-		    g.setColor(MARKIERT_FARBE);
-		} break;
-		default : if (tabelle[i].leseMarkiert() == false) {
-		    g.setColor(BESETZT_FARBE);
-		} else {
-		    g.setColor(MARKIERT_FARBE);
-		} break;
-		}
-		g.fillRect(BEGINN+(i*(BREITE+2)) , 130 , BREITE , HOEHE);
-		g.setColor(Color.black);
-		g.drawString(tabelle[i].schluesselToString() , BEGINN+((BREITE/2)-16)+(i*(BREITE+2)) , 145);
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-		g.drawString(tabelle[i].sollIndexToString() , BEGINN+((BREITE/2)-16)+(i*(BREITE+2)) , 165);
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-		g.drawString(Integer.toString(i) , BEGINN+((BREITE/2)-16)+(i*(BREITE+2)) , 195);
-	    }
+		} // Ende paint im nicht Interaktiven-Modus******************************
 
-	    g.setColor(Color.black);
-	    g.clearRect(xKorrekturfeld-1, yKorrekturfeld-1, breiteKorrekturfeld+2, hoeheKorrekturfeld+2);
-	    g.drawRect(xKorrekturfeld-1, yKorrekturfeld-1, breiteKorrekturfeld+2, hoeheKorrekturfeld+2);
-	    g.setColor(FREI_FARBE);
-	    g.fillRect(xKorrekturfeld, yKorrekturfeld, breiteKorrekturfeld, hoeheKorrekturfeld);
+		// paint im Interaktiven-Modus********************************************
+		if (interaktiv == true) {
+			g.setColor(Color.black);
+			g.fillRect(BEGINN - 1, 129, LAENGE + 1, 42);
 
-	    g.setColor(Color.black);
-	    Font schrift = g.getFont();
-	    g.setFont(new Font(schrift.getName(), Font.PLAIN, 18));
-	    g.drawString("Korrektur", xKorrekturfeld+5, yKorrekturfeld+30);
-	    g.setFont(schrift);
-	    g.setColor(BESETZT_FARBE);
-	    g.fillRect(BEGINN, 50, BREITE, HOEHE);
-	    g.setColor(Color.black);
-	    g.drawString(interaktivDatum.schluesselToString(), BEGINN+(BREITE/2)-16, 65);
-		g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-	    g.drawString(interaktivDatum.sollIndexToString(), BEGINN+(BREITE/2)-16, 85);
+			for (int i = 0; i < FELD_ANZAHL; i++) {
 
+				switch (tabelle[i].leseSchluessel()) {
+				case -2:
+					if (tabelle[i].leseMarkiert() == false) {
+						g.setColor(GELOESCHT_FARBE);
+					} else {
+						g.setColor(MARKIERT_FARBE);
+					}
+					break;
+				case -1:
+					if (tabelle[i].leseMarkiert() == false) {
+						g.setColor(FREI_FARBE);
+					} else {
 
-	} //Ende paint im Interaktiven-Modus*************************************
+						g.setColor(MARKIERT_FARBE);
+					}
+					break;
+				default:
+					if (tabelle[i].leseMarkiert() == false) {
+						g.setColor(BESETZT_FARBE);
+					} else {
+						g.setColor(MARKIERT_FARBE);
+					}
+					break;
+				}
+				g.fillRect(BEGINN + (i * (BREITE + 2)), 130, BREITE, HOEHE);
+				g.setColor(Color.black);
+				g.drawString(tabelle[i].schluesselToString(), BEGINN + ((BREITE / 2) - 16) + (i * (BREITE + 2)), 145);
+				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+				g.drawString(tabelle[i].sollIndexToString(), BEGINN + ((BREITE / 2) - 16) + (i * (BREITE + 2)), 165);
+				g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+				g.drawString(Integer.toString(i), BEGINN + ((BREITE / 2) - 16) + (i * (BREITE + 2)), 195);
+			}
 
-    }
+			g.setColor(Color.black);
+			g.clearRect(xKorrekturfeld - 1, yKorrekturfeld - 1, breiteKorrekturfeld + 2, hoeheKorrekturfeld + 2);
+			g.drawRect(xKorrekturfeld - 1, yKorrekturfeld - 1, breiteKorrekturfeld + 2, hoeheKorrekturfeld + 2);
+			g.setColor(FREI_FARBE);
+			g.fillRect(xKorrekturfeld, yKorrekturfeld, breiteKorrekturfeld, hoeheKorrekturfeld);
+
+			g.setColor(Color.black);
+			Font schrift = g.getFont();
+			g.setFont(new Font(schrift.getName(), Font.PLAIN, 18));
+			g.drawString("Korrektur", xKorrekturfeld + 5, yKorrekturfeld + 30);
+			g.setFont(schrift);
+			g.setColor(BESETZT_FARBE);
+			g.fillRect(BEGINN, 50, BREITE, HOEHE);
+			g.setColor(Color.black);
+			g.drawString(interaktivDatum.schluesselToString(), BEGINN + (BREITE / 2) - 16, 65);
+			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+			g.drawString(interaktivDatum.sollIndexToString(), BEGINN + (BREITE / 2) - 16, 85);
+
+		} // Ende paint im Interaktiven-Modus*************************************
+
+	}
 
 
     //Methoden fuer den interakiven Modus****************************************

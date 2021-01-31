@@ -109,7 +109,7 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 
 	 HTML_Interaktiv = "true".equalsIgnoreCase(getParameter("HTML_Interaktiv"));
 
-	this.setBackground(HINTERGRUND_FARBE);
+	setBackground(HINTERGRUND_FARBE);
 
 	//die Label oben fuer die Kommunikation mit dem Benutzer
 	//das Panel fuer die Label und das Layout
@@ -237,9 +237,9 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 
 	//das Gesamtlayout ohne die Tabelle
 	//die Tabelle wird erst nach Betaetigung des Buttons Erstellen erstellt
-	this.setLayout(new BorderLayout());
-	this.add("North", oben);
-	this.add("South", bedienfeld);
+	setLayout(new BorderLayout());
+	add("North", oben);
+	add("South", bedienfeld);
     System.out.println("Step: Init");
     } //Ende public void init()
 
@@ -291,17 +291,17 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 	    //	tabelle.setzeNichtInteraktiverModus();
 	    
 	    //Center wird gegebenenfalls freigeraeumt
-	    //this.remove(this.getComponentAt(200,200));
+	    //remove(getComponentAt(200,200));
 
 	    
 	    //die Tabelle wird in Center des Layout gesetzt
-	    this.add("Center", tabelle);
+	    add("Center", tabelle);
 	    tabelle.addMouseListener(this);
 
 	    //mindestens eine dieser Methoden ist notwendig, um das
 	    //Layout zu realisieren
-	    this.doLayout();
-	    this.validate();
+	    doLayout();
+	    validate();
 		
 	    //das Textfeld fuer die Schluesseleingabe wird freigegeben
 	    schluesselEingabe.setText("");
@@ -511,19 +511,19 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
     	  	
     	  
     	    //Center wird gegebenenfalls freigeraeumt
-    	    //this.remove(this.getComponentAt(tabelle.getX(), tabelle.getY()));
+    	    //remove(getComponentAt(tabelle.getX(), tabelle.getY()));
     	    //tabelle.removeAll();
     	    //tabelle.g.clearRect(0, 0, 524, 520);
     	    
 
     	    //die Tabelle wird in Center des Layout gesetzt
-    	    this.add("Center", tabelle);
+    	    add("Center", tabelle);
     	    tabelle.addMouseListener(this);
 
     	    //mindestens eine dieser Methoden ist notwendig, um das
     	    //Layout zu realisieren
-    	    this.doLayout();
-    	    this.validate();
+    	    doLayout();
+    	    validate();
     	    
     	
     	    //das Textfeld fuer die Schluesseleingabe wird freigegeben
