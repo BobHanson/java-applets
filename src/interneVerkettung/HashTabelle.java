@@ -33,13 +33,7 @@ class HashTabelle extends Panel implements Runnable {
     private static final int LOESCHEN  = 3;
     private static final int PAUSE     = 500;
     
-    /**
-     * Global Graphics element instead of getgraphics
-     * Timer for thread alterntive
-     */
-	public Graphics g;  
-	private Timer timer;
-	
+
     /**
      * F&uuml;r die Instanz g&uuml;tige Variablen
      */
@@ -131,6 +125,39 @@ class HashTabelle extends Panel implements Runnable {
 
 	}
 
+	int state;
+
+	final static int SM1 = 1;
+	final static int SM2 = 2;
+	final static int SM3 = 3;
+	
+	/**
+     * Zeichnet im nicht interaktiven Modus die Tabelle<br>
+     * Zeichnet im interaktiven Modus die Tabelle, die zus&auml;tzlichen
+     * Kontrollfelder und das Datum
+     * @param g die Graphik
+     */
+    public void paint(Graphics g) {
+    	switch (state) {
+    	case SM1:
+			sondierMethodeEins(datum, vorgang, tempo, g, ret);
+			break;
+    	case SM2:
+			sondierMethodeZwei(datum, vorgang, tempo, g, ret);
+			break;
+    	case SM3:
+			sondierMethodeDrei(datum, vorgang, tempo, g, ret);
+			break;
+    	}
+    }	
+    	
+  
+    Datum datum;
+    int methode;
+    int vorgang;
+    int tempo;
+    Consumer<String> ret;
+    
 
 	/**
 	 * Die Sondiermethode und der Vorgang werden bestimmt.
@@ -142,18 +169,25 @@ class HashTabelle extends Panel implements Runnable {
 	 * @return das Ergebnis der Aufgabe
 	 */
 	public void sondierMethode(Datum datum, int methode, int vorgang, int tempo, Consumer<String> ret) {
-
+		this.datum = datum;
+		this.methode = methode;
+		this.vorgang = vorgang;
+		this.tempo = tempo;
+		this.ret = ret;
 		switch (methode) {
-
 		case 1:
-			sondierMethodeEins(datum, vorgang, tempo, g, ret);
+			state = SM1;
+			repaint();
+			break;
 		case 2:
-			sondierMethodeZwei(datum, vorgang, tempo, g, ret);
+			state = SM2;
+			repaint();
+			break;
 		case 3:
-			sondierMethodeDrei(datum, vorgang, tempo, g, ret);
-
+			state = SM3;
+			repaint();
+			break;
 		}
-
 		ret.accept("OHA");
 	}
 
@@ -214,34 +248,34 @@ class HashTabelle extends Panel implements Runnable {
 
 			};
 			if (vorgang == EINFUEGEN) {
-				whileEinsEinfuegen(datum, vorgang, tempo, whenDone);
+				whileEinsEinfuegen(datum, vorgang, tempo, g, whenDone);
 			} else {
-				whileEins(datum, vorgang, tempo, whenDone);
+				whileEins(datum, vorgang, tempo, g, whenDone);
 			}
 		});
 	}
 
-	private void whileEinsEinfuegen(Datum datum, int vorgang, int tempo, Runnable whenDone) {
+	private void whileEinsEinfuegen(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
 		if (tabelle[tmp].leseSchluessel() > FREI && count < FELD_ANZAHL - 1) {
 			int verschiebeUmFelder = 1;
 			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
 				tmp = (tmp + 1) % FELD_ANZAHL;
 				count++;
-				whileEinsEinfuegen(datum, vorgang, tempo, whenDone);
+				whileEinsEinfuegen(datum, vorgang, tempo, g, whenDone);
 			});
 		} else {
 			whenDone.run();
 		}
 	}
 	
-	private void whileEins(Datum datum, int vorgang, int tempo, Runnable whenDone) {
+	private void whileEins(Datum datum, int vorgang, int tempo, Graphics g, Runnable whenDone) {
 		if ((tabelle[tmp].leseSollIndex() != FREI && tabelle[tmp].leseSchluessel() != datum.leseSchluessel())
 				&& count < FELD_ANZAHL - 1) {
 			int verschiebeUmFelder = 1;
 			zeichneVerschieben(g, datum, tmp, verschiebeUmFelder, vorgang, tempo, g, () -> {
 				tmp = (tmp + 1) % FELD_ANZAHL;
 				count++;
-				whileEins(datum, vorgang, tempo, whenDone);
+				whileEins(datum, vorgang, tempo, g, whenDone);
 			});
 		} else {
 			whenDone.run();
@@ -666,21 +700,6 @@ class HashTabelle extends Panel implements Runnable {
 	}
 
 
-	/**
-     * Zeichnet im nicht interaktiven Modus die Tabelle<br>
-     * Zeichnet im interaktiven Modus die Tabelle, die zus&auml;tzlichen
-     * Kontrollfelder und das Datum
-     * @param g die Graphik
-     */
-    public void paint(Graphics g) {
-    	if(this.g == null) {
-    		this.g = g;
-    		
-    	}
-    	
-    	
-    	
-    	
 	//paint im nicht Interaktiven-Modus**************************************
 	if (interaktiv == false) {
 	    
