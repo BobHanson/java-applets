@@ -516,6 +516,7 @@ class HashTabelle extends Panel implements Runnable {
 			g.dispose();
 			int newk = k + 2;
 			pause(tempo, (e) -> {
+// not necessary?
 //				Graphics g2 = getGraphics();
 //				// wrong rectangle
 //				g2.drawImage(img, 0, -2, me);
@@ -543,7 +544,7 @@ class HashTabelle extends Panel implements Runnable {
 		Color arbeitsFarbe;
 
 		Image img = createImage(BREITE, HOEHE + 3);
-		// Graphics g = img.getGraphics();-->Sonderfall
+		Graphics gi = img.getGraphics();//-->Sonderfall
 
 		switch (vorgang) {
 
@@ -560,31 +561,29 @@ class HashTabelle extends Panel implements Runnable {
 			arbeitsFarbe = DEFAULT_FARBE;
 
 		}
-		forjIst(0, arbeitsFarbe, img,datum, ort, vorgang, tempo, r);
+		forjIst(gi, 0, arbeitsFarbe, img,datum, ort, vorgang, tempo, r);
 	}
 
-	private void forjIst(int j, Color arbeitsFarbe, Image img,  Datum datum, int ort, int vorgang, int tempo,  Runnable r) {
+	private void forjIst(Graphics gi, int j, Color arbeitsFarbe, Image img,  Datum datum, int ort, int vorgang, int tempo,  Runnable whenDone) {
 		if (j < 41) {
-			Graphics g = getGraphics();
-			g.clearRect(0, 0, BREITE, HOEHE + 3);
-			g.setColor(arbeitsFarbe);
-			g.fillRect(0, 3, BREITE, HOEHE);
-			g.setColor(Color.black);
-			g.drawString(datum.schluesselToString(), (BREITE / 2) - 16, 15 + 3);
-			g.setColor(TABELLE_BESCHRIFTUNG_FARBE);
-			g.drawString(datum.sollIndexToString(), (BREITE / 2) - 16, 35 + 3);
-			g.dispose();
-			pause(tempo, (e) -> {			
-				Graphics g2 = getGraphics();
-				g2.drawImage(img, BEGINN + (ort * (BREITE + 2)), 83 + j, me);
-				g2.dispose();
-				forjIst(j + 3, arbeitsFarbe, img,datum, ort, vorgang, tempo, r);
+			gi.clearRect(0, 0, BREITE, HOEHE + 3);
+			gi.setColor(arbeitsFarbe);
+			gi.fillRect(0, 3, BREITE, HOEHE);
+			gi.setColor(Color.black);
+			gi.drawString(datum.schluesselToString(), (BREITE / 2) - 16, 15 + 3);
+			gi.setColor(TABELLE_BESCHRIFTUNG_FARBE);
+			gi.drawString(datum.sollIndexToString(), (BREITE / 2) - 16, 35 + 3);
+			pause(tempo, (e) -> {	
+				Graphics g = getGraphics();
+				g.drawImage(img, BEGINN + (ort * (BREITE + 2)), 83 + j, me);
+				g.dispose();
+				forjIst(gi, j + 3, arbeitsFarbe, img,datum, ort, vorgang, tempo, whenDone);
 			});
 		} else {
 			Graphics g = getGraphics();
 			g.drawImage(img, 0, 83 + 41, me);
 			g.dispose();
-			r.run();
+			whenDone.run();
 		}
 	}
 

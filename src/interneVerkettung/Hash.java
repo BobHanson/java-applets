@@ -475,9 +475,9 @@ public class Hash extends Applet implements ActionListener, ItemListener, MouseL
 	}
 
 	private void doNotInteractiveEinfuegen() {
-		String key = schluesselEingabe.getText();
-		int schluessel = Integer.valueOf(key).intValue();
-		schluesselEingabe.setText("");
+		int schluessel = getSchluessel();
+		if (schluessel < 0)
+			return;
 		// bei richtiger Zahleneingabe wird einfuegen in der
 		// HashTabelle aufgerufen. Die Rueckgabe aendert label2
 		Datum eingabeDatum = new Datum(feldAnzahl, schluessel);
